@@ -16,7 +16,7 @@ export function ContactSection() {
           <h3 className="mb-3 text-[15px] text-navy">{CONTACT.office}</h3>
           <div className="flex flex-col gap-3">
             <div className="flex items-start gap-2.5">
-              <Icon name="mail" className="mt-0.5 flex-none" />
+              <Icon name="mail" className="mt-0.5 h-[15px] w-[15px] flex-none" />
               <div>
                 <a href={`mailto:${CONTACT.email}`} className="text-[13px] font-semibold text-navy">{CONTACT.email}</a>
                 <div className="mt-0.5 text-xs text-muted">
@@ -25,7 +25,7 @@ export function ContactSection() {
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <Icon name="build" className="mt-0.5 flex-none" />
+              <Icon name="build" className="mt-0.5 h-[15px] w-[15px] flex-none" />
               <div className="text-[13px] leading-[1.6] text-[#46443d]">
                 <b>{CONTACT.addr1}</b><br />{CONTACT.addr2}<br />{CONTACT.addr3}
               </div>
