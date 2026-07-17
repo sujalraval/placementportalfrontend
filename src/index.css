@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #F6F3EC;
+  --color-card: #FFFFFF;
+  --color-ink: #1C1C1C;
+  --color-navy: #14315E;
+  --color-navy-2: #1E4A87;
+  --color-navy-soft: #E7ECF4;
+  --color-gold: #B07A1E;
+  --color-gold-soft: #F0E4CC;
+  --color-line: #E4DED0;
+  --color-line-2: #EDE8DC;
+  --color-muted: #6E6A60;
+  --color-green: #2E7D5B;
+  --color-green-soft: #E4F0EA;
+  --color-red: #B23A48;
+  --color-red-soft: #F6E5E7;
+
+  --font-serif: "Iowan Old Style", Georgia, Cambria, "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    line-height: 1.5;
+  }
+  h1, h2, h3, h4 {
+    @apply font-serif font-semibold text-navy;
+    line-height: 1.15;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  button {
+    @apply font-sans;
+    cursor: pointer;
+  }
+  ::selection {
+    background: var(--color-gold-soft);
+  }
+}
+
+@layer utilities {
+  .eyebrow {
+    @apply text-[11px] tracking-[.16em] uppercase text-gold font-bold;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}

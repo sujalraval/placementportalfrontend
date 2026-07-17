@@ -1,0 +1,33 @@
+import { Pill } from '@/components/ui/Pill'
+import { PageHead } from '@/components/shared/PageHead'
+import { usePortalData } from '@/context/PortalDataContext'
+
+export default function DeptDrivesPage() {
+  const { drives } = usePortalData()
+
+  return (
+    <div>
+      <PageHead title="Drives — CS & IT" description="Drives your students are eligible for, with registration counts" />
+      <div className="grid grid-cols-3 gap-3.5 max-lg:grid-cols-1">
+        {drives.map((d) => {
+          const [day, month] = d.date.split(' ')
+          return (
+            <div key={d.co} className="flex flex-col overflow-hidden rounded-xl border border-line bg-white">
+              <div className="flex items-center gap-3.5 p-4">
+                <div className="flex h-[52px] w-[52px] flex-none flex-col items-center justify-center rounded-[10px] bg-navy text-white">
+                  <b className="tnum font-serif text-xl">{day}</b>
+                  <span className="text-[9px] uppercase tracking-[.1em] text-[#B9C4D8]">{month || ''}</span>
+                </div>
+                <div><h3 className="text-[16px]">{d.title}</h3><div className="text-xs text-muted">{d.depts} · {d.reg} registered</div></div>
+              </div>
+              <div className="mt-auto flex items-center justify-between border-t border-line-2 p-4">
+                <span className="text-[11.5px] text-[#46443d]">{d.rounds}</span>
+                <Pill status={d.status} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
