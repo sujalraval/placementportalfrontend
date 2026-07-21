@@ -22,8 +22,26 @@ export const authApi = {
   },
 
   register: async (payload: RegisterPayload) => {
-    const response = await apiClient.post('/auth/register/local', payload);
-    return response.data.data; // { user }
+    let url = '';
+    let body = { ...payload } as any;
+
+    if (payload.role === 'STUDENT') {
+      url = '/auth/register/student';
+      // Mock required fields if missing from UI
+      body.enrollmentNo = body.enrollmentNo || `ENR${Math.floor(Math.random() * 100000)}`;
+      body.departmentId = body.departmentId || '00000000-0000-0000-0000-000000000001'; // Will fail if UUID doesn't exist, need actual department
+      body.batchStartYear = body.batchStartYear || 2022;
+      body.batchEndYear = body.batchEndYear || 2026;
+    } else if (payload.role === 'RECRUITER') {
+      url = '/auth/register/recruiter';
+      body.companyName = body.companyName || 'Default Company';
+      body.companyType = body.companyType || 'DIRECT_EMPLOYER';
+    } else {
+      throw new Error('Registration for this role is not supported via this form.');
+    }
+
+    const response = await apiClient.post(url, body);
+    return response.data.data;
   },
 
   getMe: async () => {

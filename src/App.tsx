@@ -10,6 +10,8 @@ import { ChatWidget } from '@/components/shared/ChatWidget'
 import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import VerifyOtp from './pages/VerifyOtp'
+import SetupPassword from './pages/SetupPassword'
 import { useAuthStore } from './store/useAuthStore'
 import { authApi } from './api/auth'
 
@@ -39,6 +41,8 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/setup-password" element={<SetupPassword />} />
         </Route>
         
         <Route element={<ProtectedRoute />}>
