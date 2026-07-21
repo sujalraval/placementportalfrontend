@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { authApi } from '../api/auth';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Loader2, AlertCircle, Mail, KeyRound } from 'lucide-react';
 
 export default function VerifyOtp() {
