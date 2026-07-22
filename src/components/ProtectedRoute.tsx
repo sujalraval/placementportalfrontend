@@ -19,10 +19,17 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
-    // Redirect them to the /login page, but save the current location they were
+    // Redirect them to the /login page (or role-specific login), but save the current location they were
     // trying to go to when they were redirected. This allows us to send them
     // along to that page after they login, which is a nicer user experience.
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const segments = location.pathname.split('/').filter(Boolean);
+    const roleMatch = segments.length > 0 ? segments[0] : null;
+    const validRoles = ['student', 'recruiter', 'faculty', 'department', 'admin', 'erp'];
+    const redirectPath = roleMatch && validRoles.includes(roleMatch) 
+      ? `/${roleMatch}/login` 
+      : '/login';
+
+    return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {

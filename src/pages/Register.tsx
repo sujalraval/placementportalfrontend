@@ -13,6 +13,23 @@ export default function Register() {
   const [role, setRole] = useState<UserRole>('STUDENT');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState<'details' | 'otp'>('details');
+  const [otp, setOtp] = useState('');
+
+  const handleRequestOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await authApi.requestOtp(email);
+      setStep('otp');
+    } catch (err: any) {
+      setError(err.response?.data?.error?.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +37,7 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      await authApi.register({ fullName, email, password, role });
+      await authApi.register({ fullName, email, password, role, otp });
       // On successful registration, redirect to login so they can log in
       navigate('/login', { state: { message: 'Registration successful! Please login.' } });
     } catch (err: any) {
@@ -103,8 +120,10 @@ export default function Register() {
           )}
           
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-ink mb-1" htmlFor="fullName">
+            {step === 'details' ? (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-ink mb-1" htmlFor="fullName">
                 Full Name
               </label>
               <div className="relative">
@@ -180,23 +199,51 @@ export default function Register() {
                 <option value="STUDENT">Student</option>
                 <option value="RECRUITER">Recruiter</option>
                 <option value="FACULTY">Faculty</option>
-              </select>
-            </div>
+                </select>
+              </div>
+            </>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-ink mb-1" htmlFor="otp">
+                  6-Digit OTP Code
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-muted" />
+                  </div>
+                  <input
+                    id="otp"
+                    name="otp"
+                    type="text"
+                    required
+                    maxLength={6}
+                    className="appearance-none block w-full pl-10 pr-3 py-2.5 border border-line rounded focus:outline-none focus:ring-1 focus:ring-navy focus:border-navy sm:text-lg tracking-widest text-center transition-colors bg-white text-ink placeholder-muted"
+                    placeholder="000000"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-muted text-center">
+                  Code sent to {email}. <button type="button" onClick={() => setStep('details')} className="text-navy hover:underline">Change email?</button>
+                </p>
+              </div>
+            )}
           </div>
 
           <div>
             <button
-              type="submit"
-              disabled={isLoading}
+              type={step === 'details' ? 'button' : 'submit'}
+              onClick={step === 'details' ? handleRequestOtp : undefined}
+              disabled={isLoading || (step === 'otp' && otp.length !== 6)}
               className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded shadow-sm text-sm font-medium text-white bg-navy hover:bg-navy-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Creating account...
+                  {step === 'details' ? 'Sending OTP...' : 'Creating account...'}
                 </>
               ) : (
-                'Register'
+                step === 'details' ? 'Continue' : 'Verify & Register'
               )}
             </button>
           </div>

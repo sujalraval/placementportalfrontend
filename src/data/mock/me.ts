@@ -1,12 +1,12 @@
-export interface ProfileLink { label: string; url: string; ic: string }
-export interface Experience { role: string; co: string; dur: string; loc: string; desc: string; tech: string }
-export interface Achievement { t: string; y: string; d: string }
-export interface Position { role: string; org: string; dur: string; d: string }
-export interface Semester { s: string; sgpa: string; cr: number; res: 'Passed' | 'In progress' | 'Backlog' }
-export interface Skill { n: string; lv: number }
-export interface Project { name: string; stack: string; desc: string; repo: string; demo: string }
-export interface Certification { name: string; by: string; year: string }
-export interface StudentDocument { name: string; type: string; status: string }
+export interface ProfileLink { id?: string | number; label: string; url: string; ic: string }
+export interface Experience { id?: string | number; role: string; co: string; dur: string; loc: string; desc: string; tech: string }
+export interface Achievement { id?: string | number; t: string; y: string; d: string }
+export interface Position { id?: string | number; role: string; org: string; dur: string; d: string }
+export interface Semester { id?: string | number; s: string; sgpa: string; cr: number; res: 'Passed' | 'In progress' | 'Backlog' }
+export interface Skill { id?: string | number; n: string; lv: number }
+export interface Project { id?: string | number; name: string; stack: string; desc: string; repo: string; demo: string }
+export interface Certification { id?: string | number; name: string; by: string; year: string }
+export interface StudentDocument { id?: string | number; name: string; type: string; status: string; url?: string }
 
 export interface StudentProfile {
   name: string

@@ -6,7 +6,7 @@ import { useModal } from '@/context/ModalContext'
 export interface FieldConfig {
   id: string
   label: string
-  type?: 'text' | 'select' | 'textarea' | 'password' | 'number' | 'range'
+  type?: 'text' | 'select' | 'textarea' | 'password' | 'number' | 'range' | 'date'
   options?: string[]
   full?: boolean
   rows?: number
@@ -24,7 +24,7 @@ export function SimpleFormModal({ fields, initial = {}, onSubmit, submitLabel = 
   const { closeModal } = useModal()
   const [values, setValues] = useState<Record<string, string>>(() => {
     const v: Record<string, string> = {}
-    for (const f of fields) v[f.id] = initial[f.id] ?? (f.options ? f.options[0] : '')
+    for (const f of fields) v[f.id] = initial[f.id] || (f.options ? f.options[0] : '')
     return v
   })
 
@@ -48,7 +48,7 @@ export function SimpleFormModal({ fields, initial = {}, onSubmit, submitLabel = 
               </div>
             ) : (
               <Input
-                type={f.type === 'password' ? 'password' : f.type === 'number' ? 'number' : 'text'}
+                type={f.type === 'password' ? 'password' : f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
                 value={values[f.id]}
                 placeholder={f.placeholder}
                 onChange={(e) => setField(f.id, e.target.value)}

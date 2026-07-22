@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Loader2, AlertCircle, Mail, KeyRound } from 'lucide-react';
+import { authApi } from '../api/auth';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function VerifyOtp() {
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
+  const isLogin = location.state?.isLogin;
+  const role = location.state?.role;
+  const { setAuth } = useAuthStore();
   
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
@@ -31,15 +36,22 @@ export default function VerifyOtp() {
     setIsLoading(true);
 
     try {
-      // In a real implementation, you'd have an API call here:
-      // const response = await authApi.verifyOtp({ email, otp });
-      // If the user already has a password, log them in. 
-      // If not, send them to setup-password.
-      
-      // We will assume for now they need to setup a password
-      navigate('/setup-password', { state: { email, otp } });
+      if (isLogin) {
+        const data = await authApi.loginOtp({ email, otp });
+        setAuth(data.accessToken, data.user);
+        const mappedRole = data.user.role === 'COORDINATOR' ? 'dept' : data.user.role.toLowerCase();
+        navigate(`/${mappedRole}/dashboard`, { replace: true });
+      } else {
+        await authApi.verifyOtp({ email, otp });
+        navigate('/setup-password', { state: { email, otp, role } });
+      }
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Invalid or expired OTP. Please try again.');
+      if (isLogin && err.response?.status === 401) {
+        // If login with OTP fails because account doesn't exist, proceed to registration
+        navigate('/setup-password', { state: { email, otp, role } });
+      } else {
+        setError(err.response?.data?.error?.message || 'Invalid or expired OTP. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }

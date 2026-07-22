@@ -7,48 +7,10 @@ import { useModal } from '@/context/ModalContext'
 import { useToast } from '@/context/ToastContext'
 import { usePortalData } from '@/context/PortalDataContext'
 
-const TAG_LABEL = { soft: 'soft skill', lang: 'language', intr: 'interest' } as const
-type TagKind = keyof typeof TAG_LABEL
-
-function TagList({ title, kind, values, onAdd, onDelete }: {
-  title: string; kind: TagKind; values: string[]
-  onAdd: (kind: TagKind, value: string) => void
-  onDelete: (kind: TagKind, i: number) => void
-}) {
-  const { openModal, closeModal } = useModal()
-  const { showToast } = useToast()
-
-  const openAddForm = () => {
-    openModal(`Add ${TAG_LABEL[kind]}`, (
-      <SimpleFormModal
-        submitLabel="Add"
-        fields={[{ id: 't', label: 'Value', full: true }]}
-        onSubmit={(v) => {
-          if (!v.t) { showToast('Value is required'); return }
-          onAdd(kind, v.t); closeModal(); showToast('Added')
-        }}
-      />
-    ))
-  }
-
-  return (
-    <div>
-      <SectionTitle title={title} />
-      <div className="flex flex-wrap items-center gap-2">
-        {values.map((s, i) => (
-          <span key={s} className="inline-flex items-center gap-0 rounded-full border border-line bg-paper px-3 py-1.5 text-xs font-semibold text-[#3a3833]">
-            {s}
-            <button onClick={() => { onDelete(kind, i); showToast('Removed') }} className="ml-1.5 text-sm font-extrabold text-muted hover:text-red">×</button>
-          </span>
-        ))}
-        <button onClick={openAddForm} className="rounded-full border border-dashed border-[#c9c2b0] px-3.5 py-1.5 text-xs font-bold text-navy hover:border-navy hover:bg-paper">+ Add</button>
-      </div>
-    </div>
-  )
-}
+// TagList removed due to lack of backend support
 
 export function SkillsTab() {
-  const { me, addSkill, editSkill, deleteSkill, addTag, deleteTag } = usePortalData()
+  const { me, addSkill, editSkill, deleteSkill } = usePortalData()
   const { openModal, closeModal } = useModal()
   const { showToast } = useToast()
 
@@ -87,13 +49,6 @@ export function SkillsTab() {
           </div>
         ))}
       </SectionCard>
-      <Card pad className="flex-[.8]">
-        <div className="flex flex-col gap-5">
-          <TagList title="Soft skills" kind="soft" values={me.soft} onAdd={addTag} onDelete={deleteTag} />
-          <TagList title="Languages" kind="lang" values={me.languages} onAdd={addTag} onDelete={deleteTag} />
-          <TagList title="Areas of interest" kind="intr" values={me.interests} onAdd={addTag} onDelete={deleteTag} />
-        </div>
-      </Card>
     </div>
   )
 }

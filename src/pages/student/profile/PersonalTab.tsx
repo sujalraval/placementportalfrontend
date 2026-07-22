@@ -18,16 +18,21 @@ export function PersonalTab() {
   const { showToast } = useToast()
 
   const openPersonalForm = () => {
+    let initialDob = ''
+    if (me.dob) {
+      const d = new Date(me.dob)
+      if (!isNaN(d.getTime())) initialDob = d.toISOString().split('T')[0]
+    }
     openModal('Edit personal details', (
       <SimpleFormModal
         submitLabel="Save"
-        initial={{ name: me.name, dob: me.dob, gender: me.gender, category: me.category, city: me.city, email: me.email, phone: me.phone, linkedin: me.linkedin, github: me.github, address: me.address }}
+        initial={{ name: me.name, dob: initialDob, gender: me.gender, category: me.category, city: me.city, phone: me.phone, linkedin: me.linkedin, github: me.github, address: me.address }}
         fields={[
-          { id: 'name', label: 'Full name' }, { id: 'dob', label: 'Date of birth' },
-          { id: 'gender', label: 'Gender' }, { id: 'category', label: 'Category' },
-          { id: 'city', label: 'City' }, { id: 'email', label: 'Email' },
-          { id: 'phone', label: 'Mobile' }, { id: 'linkedin', label: 'LinkedIn' },
-          { id: 'github', label: 'GitHub' }, { id: 'address', label: 'Address', full: true },
+          { id: 'name', label: 'Full name' }, { id: 'dob', label: 'Date of birth', type: 'date' },
+          { id: 'gender', label: 'Gender', type: 'select', options: ['Male', 'Female', 'Other'] }, { id: 'category', label: 'Category' },
+          { id: 'city', label: 'City' }, { id: 'phone', label: 'Mobile' },
+          { id: 'linkedin', label: 'LinkedIn' }, { id: 'github', label: 'GitHub' }, 
+          { id: 'address', label: 'Address', full: true },
         ]}
         onSubmit={(v) => { updatePersonal(v); closeModal(); showToast('Personal details updated') }}
       />

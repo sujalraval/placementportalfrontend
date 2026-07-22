@@ -31,7 +31,11 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     // If the server returns 401 Unauthorized, clear the token and redirect to login
-    if (error.response && error.response.status === 401) {
+    // Skip this behavior for auth endpoints where 401 is expected (like wrong credentials or account doesn't exist)
+    const url = error.config?.url || '';
+    const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/otp/verify');
+    
+    if (error.response && error.response.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('token');
       // Only redirect if we are not already on the login page
       if (window.location.pathname !== '/login') {

@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Loader2, AlertCircle, Lock } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
+import { Loader2, AlertCircle, Lock, User } from 'lucide-react';
+import { authApi } from '../api/auth';
+import type { UserRole } from '../store/useAuthStore';
 
 export default function SetupPassword() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setAuth } = useAuthStore();
   const email = location.state?.email;
   const otp = location.state?.otp;
+  const defaultRole = location.state?.role ? location.state.role.toUpperCase() : 'STUDENT';
   
+  const [fullName, setFullName] = useState('');
+  const [role] = useState<UserRole>(defaultRole as UserRole);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -35,23 +42,30 @@ export default function SetupPassword() {
       return;
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
+    if (password.length < 10) {
+      setError('Password must be at least 10 characters long');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // In a real implementation:
-      // await authApi.setupPassword({ email, otp, newPassword: password });
+      const data = await authApi.register({ fullName, email, password, role, otp });
+      setAuth(data.accessToken, data.user);
       
-      // Simulate success for now
-      setTimeout(() => {
-        navigate('/login', { state: { message: 'Password setup successful! You can now log in.' } });
-      }, 1000);
+      const mappedRole = role === 'COORDINATOR' ? 'dept' : role.toLowerCase();
+      // If student, go to profile, else go to their specific dashboard
+      const redirectPath = role === 'STUDENT' ? '/student/profile' : `/${mappedRole}/dashboard`;
+      
+      navigate(redirectPath, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to setup password. Please try again.');
+      const apiError = err.response?.data?.error;
+      if (apiError?.code === 'VALIDATION_ERROR' && Array.isArray(apiError.details)) {
+        const detailsStr = apiError.details.map((d: any) => `${d.path}: ${d.message}`).join(', ');
+        setError(`Validation Failed: ${detailsStr}`);
+      } else {
+        setError(apiError?.message || 'Failed to complete registration. Please try again.');
+      }
       setIsLoading(false);
     }
   };
@@ -61,10 +75,10 @@ export default function SetupPassword() {
       <div className="max-w-md w-full space-y-8 bg-card p-8 rounded border border-line shadow-sm">
         <div>
           <h2 className="mt-2 text-center text-3xl font-serif font-semibold text-navy tracking-tight">
-            Set a Password
+            Complete Registration
           </h2>
           <p className="mt-2 text-center text-sm text-muted">
-            Create a password for <span className="font-medium text-ink">{email}</span>
+            Set up your profile and password for <span className="font-medium text-ink">{email}</span>
           </p>
         </div>
         
@@ -77,6 +91,27 @@ export default function SetupPassword() {
           )}
           
           <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-ink mb-1" htmlFor="fullName">
+                Full Name
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-muted" />
+                </div>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  required
+                  className="appearance-none block w-full pl-10 pr-3 py-2.5 border border-line rounded focus:outline-none focus:ring-1 focus:ring-navy focus:border-navy sm:text-sm transition-colors bg-white text-ink placeholder-muted"
+                  placeholder="John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-ink mb-1" htmlFor="password">
                 New Password
@@ -132,7 +167,7 @@ export default function SetupPassword() {
                   Saving...
                 </>
               ) : (
-                'Save Password'
+                'Complete Registration'
               )}
             </button>
           </div>

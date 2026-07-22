@@ -61,12 +61,12 @@ export function OverviewTab() {
         submitLabel="Save"
         initial={{ roles: p.roles, type: p.type, ctc: p.ctc, locations: p.locations, relocate: p.relocate, avail: p.avail }}
         fields={[
-          { id: 'roles', label: 'Preferred roles', full: true },
-          { id: 'type', label: 'Job type' },
-          { id: 'ctc', label: 'Expected CTC' },
-          { id: 'locations', label: 'Preferred locations', full: true },
-          { id: 'relocate', label: 'Relocation' },
-          { id: 'avail', label: 'Availability' },
+          { id: 'roles', label: 'Preferred roles', full: true, placeholder: 'Software Engineer, Data Analyst' },
+          { id: 'type', label: 'Job type', type: 'select', options: ['Placement', 'Internship', 'OJT', 'Placement · Internship'] },
+          { id: 'ctc', label: 'Expected CTC', placeholder: 'e.g. 10 LPA' },
+          { id: 'locations', label: 'Preferred locations', full: true, placeholder: 'Bangalore, Pune, Remote' },
+          { id: 'relocate', label: 'Relocation', type: 'select', options: ['Open to relocate', 'Not open to relocate'] },
+          { id: 'avail', label: 'Availability', type: 'select', options: ['Available', 'Not Available'] },
         ]}
         onSubmit={(v) => {
           updatePreferences({ roles: v.roles, type: v.type, ctc: v.ctc, locations: v.locations, relocate: v.relocate, avail: v.avail })
@@ -92,8 +92,8 @@ export function OverviewTab() {
           <div className="flex flex-col gap-2.5">
             {me.links.map((l, i) => (
               <div key={l.label} className="flex items-center justify-between gap-2 rounded-lg border border-line bg-white px-3.5 py-2.5">
-                <button onClick={() => showToast(`Opening ${l.url}…`)} className="flex flex-1 items-center gap-2 text-left">
-                  <Icon name={l.ic as IconName} className="text-navy" />
+                <button onClick={() => showToast(`Opening ${l.url}…`)} className="flex flex-1 items-center gap-3 text-left">
+                  <Icon name={l.ic as IconName} className="text-navy w-6 h-6 flex-none" />
                   <div><b className="block text-[13px] font-semibold text-navy">{l.label}</b><span className="text-[11.5px] font-medium text-muted">{l.url}</span></div>
                 </button>
                 <div className="flex flex-none gap-1.5">
