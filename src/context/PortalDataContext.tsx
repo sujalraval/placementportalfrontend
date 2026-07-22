@@ -189,7 +189,7 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       const handleLink = (label: string, value: string | undefined) => {
         if (value === undefined) return;
         const existing = me.links.find(l => l.label.toLowerCase() === label.toLowerCase());
-        if (existing && existing.url !== value) {
+        if (existing && existing.url !== value && existing.id !== undefined) {
           studentApi.deleteLink(existing.id.toString()).then(() => {
             if (value) studentApi.addLink({ label, url: value }).catch(console.error);
           }).catch(console.error);

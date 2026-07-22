@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
-import { SectionCard, SectionTitle } from '@/components/shared/SectionCard'
+import { SectionCard } from '@/components/shared/SectionCard'
 import { IconControlButton } from '@/components/shared/IconControls'
 import { SimpleFormModal } from '@/components/shared/SimpleFormModal'
 import { useModal } from '@/context/ModalContext'
