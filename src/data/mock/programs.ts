@@ -1,5 +1,7 @@
 export interface Program {
+  id?: string
   name: string
+  code?: string
   dept: string
   degree: 'Undergraduate' | 'Postgraduate' | 'Diploma' | 'Doctoral'
   seats: number

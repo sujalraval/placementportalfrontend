@@ -9,6 +9,8 @@ export interface User {
   role: UserRole;
   studentId?: string;
   recruiterId?: string;
+  companyId?: string;
+  departmentId?: string;
 }
 
 interface AuthState {

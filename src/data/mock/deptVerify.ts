@@ -1,4 +1,5 @@
 export interface DeptVerifyItem {
+  id?: string
   en: string
   name: string
   item: string

@@ -1,6 +1,7 @@
 import type { IconName } from '@/components/icons/icons'
 
 export interface NotifItem {
+  id?: string
   ic: IconName
   type: string
   title: string

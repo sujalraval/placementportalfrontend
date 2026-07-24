@@ -1,9 +1,11 @@
 export interface RecJobApplicant {
+  id?: string
   en: string
   stage: 'Applied' | 'Shortlisted' | 'Interview' | 'Offer' | 'Rejected'
 }
 
 export interface RecJob {
+  id?: string
   co: string
   role: string
   type: string

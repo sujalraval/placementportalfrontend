@@ -1,4 +1,5 @@
 export interface AlumniMember {
+  id?: string
   name: string
   batch: string
   co: string

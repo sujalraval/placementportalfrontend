@@ -1,8 +1,12 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { useToast } from '@/context/ToastContext'
 import { usePortalData } from '@/context/PortalDataContext'
+import { useAuthStore } from '@/store/useAuthStore'
+import { companyApi } from '@/api/company'
+import { postingApi, mapBackendPostingToFrontend, mapFrontendPostingToBackend } from '@/api/posting'
+import { applicationApi, mapBackendStageToFrontend, mapFrontendStageToBackend } from '@/api/application'
 import { REC_INITIAL, type RecruiterProfile, type RecContact } from '@/data/mock/recruiter'
-import { REC_JOBS_INITIAL, type RecJob, type RecJobApplicant } from '@/data/mock/recruiterJobs'
+import { type RecJob, type RecJobApplicant } from '@/data/mock/recruiterJobs'
 import { REC_CANDS_INITIAL, type RecCandidate, type RecCandidateMarks, type RecCandidateSalary, RND } from '@/data/mock/candidates'
 import { INTERVIEWS_INITIAL, type Interview } from '@/data/mock/interviews'
 import { OFFERS_INITIAL, type Offer } from '@/data/mock/offers'
@@ -50,11 +54,54 @@ export function RecruiterDataProvider({ children }: { children: ReactNode }) {
   const { setStatus } = usePortalData()
 
   const [rec, setRec] = useState<RecruiterProfile>(REC_INITIAL)
-  const [recJobs, setRecJobs] = useState<RecJob[]>(REC_JOBS_INITIAL)
+  const [recJobs, setRecJobs] = useState<RecJob[]>([])
   const [recCands, setRecCands] = useState<RecCandidate[]>(REC_CANDS_INITIAL)
   const [interviews, setInterviews] = useState<Interview[]>(INTERVIEWS_INITIAL)
   const [offers, setOffers] = useState<Offer[]>(OFFERS_INITIAL)
   const [recDrives, setRecDrives] = useState<RecDrive[]>(REC_DRIVES_INITIAL)
+
+  const { user } = useAuthStore()
+
+  useEffect(() => {
+    if (user && user.role === 'RECRUITER') {
+      if (user.companyId) {
+        companyApi.getById(user.companyId).then(data => {
+          const c = data.data || data;
+          setRec(r => ({
+            ...r,
+            company: c.name,
+            website: c.website || '',
+            about: c.description || '',
+            address: c.hqLocation || '',
+            sector: c.sector?.name || 'Unknown',
+            status: c.verificationStatus === 'VERIFIED' ? 'Verified' : 'Pending',
+          }));
+        }).catch(err => console.error('Failed to load company profile:', err))
+      }
+
+      postingApi.list().then(async data => {
+        const jobs = (data.data || data).map(mapBackendPostingToFrontend);
+        
+        try {
+          const appsRes = await applicationApi.list();
+          const apps = appsRes.data || appsRes;
+          jobs.forEach((job: RecJob) => {
+            const jobApps = apps.filter((a: any) => a.jobPostingId === job.id);
+            job.applicants = jobApps.map((a: any) => ({
+               id: a.id,
+               en: a.student?.enrollmentNo || 'Unknown',
+               stage: mapBackendStageToFrontend(a.status)
+            }));
+            job.apps = job.applicants.length;
+          });
+        } catch (e) {
+          console.error('Failed to load applications for jobs', e);
+        }
+
+        setRecJobs(jobs);
+      }).catch(err => console.error('Failed to load postings:', err))
+    }
+  }, [user])
 
   const value: RecruiterDataValue = {
     rec, recJobs, recCands, interviews, offers, recDrives,
@@ -84,34 +131,64 @@ export function RecruiterDataProvider({ children }: { children: ReactNode }) {
     },
 
     saveJob(i, job) {
-      setRecJobs((jobs) => {
-        if (i >= 0) {
-          const prev = jobs[i]
-          return jobs.map((j, idx) => (idx === i ? { ...job, co: prev.co, apps: prev.apps, applicants: prev.applicants } : j))
-        }
-        return [...jobs, { ...job, co: rec.company, apps: 0, applicants: [] }]
-      })
-      showToast(job.status === 'Published' ? 'Posting published — eligible students notified' : 'Saved as draft')
+      const backendPayload = mapFrontendPostingToBackend(job);
+      if (i >= 0 && recJobs[i]?.id) {
+        // Update existing
+        postingApi.update(recJobs[i].id!, backendPayload).then(res => {
+          setRecJobs((jobs) => jobs.map((j, idx) => (idx === i ? mapBackendPostingToFrontend(res.data || res) : j)))
+          showToast(job.status === 'Published' ? 'Posting published — eligible students notified' : 'Saved as draft')
+        }).catch(err => console.error('Failed to update job:', err))
+      } else {
+        // Create new
+        postingApi.create(backendPayload).then(res => {
+          setRecJobs((jobs) => [...jobs, mapBackendPostingToFrontend(res.data || res)])
+          showToast('Saved as draft')
+        }).catch(err => console.error('Failed to create job:', err))
+      }
     },
     publishJob(i) {
-      setRecJobs((jobs) => jobs.map((j, idx) => (idx === i ? { ...j, status: 'Published' } : j)))
-      showToast('Posting published — eligible students notified')
+      const jobId = recJobs[i]?.id;
+      if (!jobId) return;
+      postingApi.updateStatus(jobId, { status: 'PENDING_APPROVAL' }).then(() => {
+        setRecJobs((jobs) => jobs.map((j, idx) => (idx === i ? { ...j, status: 'Pending approval' } : j)))
+        showToast('Submitted to Placement Cell for approval')
+      }).catch(err => console.error('Failed to publish job:', err))
     },
     closeJob(i) {
-      setRecJobs((jobs) => jobs.map((j, idx) => (idx === i ? { ...j, status: 'Closed' } : j)))
-      showToast('Posting closed')
+      const jobId = recJobs[i]?.id;
+      if (!jobId) return;
+      postingApi.updateStatus(jobId, { status: 'CLOSED' }).then(() => {
+        setRecJobs((jobs) => jobs.map((j, idx) => (idx === i ? { ...j, status: 'Closed' } : j)))
+        showToast('Posting closed')
+      }).catch(err => console.error('Failed to close job:', err))
     },
     deleteJob(i) {
+      // Backend doesn't support deleting job postings in standard schema, but we can remove it from UI
       setRecJobs((jobs) => jobs.filter((_, idx) => idx !== i))
-      showToast('Posting deleted')
+      showToast('Posting hidden')
     },
     setAppStage(jobIndex, en, stage) {
-      let candName = ''
-      setRecJobs((jobs) => jobs.map((j, idx) => {
-        if (idx !== jobIndex) return j
-        return { ...j, applicants: j.applicants.map((a) => { if (a.en === en) { candName = en; return { ...a, stage } } return a }) }
-      }))
-      showToast(`${candName || 'Candidate'} → ${stage}`)
+      const job = recJobs[jobIndex];
+      const applicant = job?.applicants.find(a => a.en === en);
+      
+      let candName = en;
+      
+      if (applicant?.id) {
+        applicationApi.updateStatus(applicant.id, { status: mapFrontendStageToBackend(stage) }).then(() => {
+          setRecJobs((jobs) => jobs.map((j, idx) => {
+            if (idx !== jobIndex) return j
+            return { ...j, applicants: j.applicants.map((a) => { if (a.en === en) { candName = en; return { ...a, stage } } return a }) }
+          }))
+          showToast(`${candName || 'Candidate'} → ${stage}`)
+        }).catch(err => console.error('Failed to update stage:', err))
+      } else {
+        // Fallback for mock data that might not have an ID yet
+        setRecJobs((jobs) => jobs.map((j, idx) => {
+          if (idx !== jobIndex) return j
+          return { ...j, applicants: j.applicants.map((a) => { if (a.en === en) { candName = en; return { ...a, stage } } return a }) }
+        }))
+        showToast(`${candName || 'Candidate'} → ${stage}`)
+      }
     },
 
     saveMarks(i, round, score, result) {

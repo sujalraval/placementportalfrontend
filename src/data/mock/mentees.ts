@@ -5,6 +5,7 @@ export interface MenteeEvaluation {
 }
 
 export interface Mentee {
+  id?: string
   en: string
   name: string
   co: string

@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuthStore } from '@/store/useAuthStore'
 import { Icon } from '@/components/icons/Icon'
 import { initials } from '@/lib/text'
 import type { PersonaNavConfig } from '@/types/nav'
@@ -10,6 +11,15 @@ interface SidebarProps {
 }
 
 export function Sidebar({ config, open, onNavigate }: SidebarProps) {
+  const navigate = useNavigate();
+  const clearAuth = useAuthStore(state => state.clearAuth);
+  const user = useAuthStore(state => state.user);
+
+  const handleLogout = () => {
+    clearAuth();
+    navigate('/login');
+  };
+
   return (
     <aside
       className={`fixed inset-y-0 top-[62px] z-[60] flex w-[250px] flex-none flex-col gap-0.5 overflow-y-auto border-r border-line bg-white p-3 shadow-[8px_0_40px_rgba(0,0,0,.18)] transition-transform duration-200 ease-in-out lg:sticky lg:top-[62px] lg:z-auto lg:h-[calc(100vh-62px)] lg:w-[236px] lg:translate-x-0 lg:shadow-none ${
@@ -34,14 +44,25 @@ export function Sidebar({ config, open, onNavigate }: SidebarProps) {
           <span>{item.label}</span>
         </NavLink>
       ))}
-      <div className="mt-auto flex items-center gap-2.5 border-t border-line p-3">
-        <div className="grid h-[34px] w-[34px] place-items-center rounded-full bg-navy-soft text-[13px] font-bold text-navy">
-          {initials(config.footName)}
+      <div className="mt-auto border-t border-line">
+        <div className="flex items-center gap-2.5 p-3">
+          <div className="grid h-[34px] w-[34px] place-items-center rounded-full bg-navy-soft text-[13px] font-bold text-navy">
+            {initials(user?.fullName || config.footName)}
+          </div>
+          <div>
+            <b className="block text-[13px] line-clamp-1">{user?.fullName || config.footName}</b>
+            <small className="block text-[11px] text-muted line-clamp-1 capitalize">
+              {user?.role?.toLowerCase() || config.footSub}
+            </small>
+          </div>
         </div>
-        <div>
-          <b className="block text-[13px]">{config.footName}</b>
-          <small className="block text-[11px] text-muted">{config.footSub}</small>
-        </div>
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-2.5 border-t border-line px-6 py-3 text-[13.5px] font-medium text-[#D93025] hover:bg-[#FCE8E6] transition-colors"
+        >
+          <Icon name="log-out" />
+          <span>Log out</span>
+        </button>
       </div>
     </aside>
   )

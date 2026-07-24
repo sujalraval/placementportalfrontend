@@ -47,6 +47,7 @@ export interface MyInternship {
 }
 
 export interface InternApproval {
+  id?: string
   en: string
   name: string
   co: string

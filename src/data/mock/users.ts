@@ -1,6 +1,7 @@
 export interface AdminUser {
+  id?: string
   name: string
-  role: 'Student' | 'Coordinator' | 'Placement Officer' | 'Recruiter' | 'Admin'
+  role: 'Student' | 'Coordinator' | 'Faculty' | 'Placement Officer' | 'Recruiter' | 'Admin'
   dept: string
   email: string
   status: 'Active' | 'Pending' | 'Suspended'

@@ -1,4 +1,5 @@
 export interface TrainingCourse {
+  id?: string
   name: string
   cat: string
   dur: string

@@ -11,6 +11,7 @@ export interface Ticket {
 }
 
 export interface Survey {
+  id?: string
   name: string
   aud: string
   resp: number

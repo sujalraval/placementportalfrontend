@@ -14,17 +14,19 @@ export function ProgramFormModal({ index, item }: { index: number; item?: Progra
   return (
     <SimpleFormModal
       submitLabel="Save"
-      initial={item ? { name: item.name, dept: item.dept, degree: item.degree, seats: String(item.seats), duration: item.duration } : { dept: depts[0]?.name, degree: DEGREES[0] }}
+      initial={item ? { name: item.name, code: item.code || '', dept: item.dept, degree: item.degree, seats: String(item.seats), duration: item.duration } : { dept: depts[0]?.name, degree: DEGREES[0] }}
       fields={[
         { id: 'name', label: 'Program name', full: true },
+        { id: 'code', label: 'Program Code (e.g. BCA)' },
         { id: 'dept', label: 'Department', type: 'select', options: depts.map((d) => d.name) },
         { id: 'degree', label: 'Level', type: 'select', options: DEGREES },
         { id: 'seats', label: 'Seats', type: 'number' },
-        { id: 'duration', label: 'Duration', placeholder: '3 years' },
+        { id: 'duration', label: 'Duration (years)', placeholder: '3', type: 'number' },
       ]}
       onSubmit={(v) => {
         if (!v.name) { showToast('Name is required'); return }
-        saveProgram(index, { name: v.name, dept: v.dept, degree: v.degree as Program['degree'], seats: +v.seats || 0, duration: v.duration })
+        if (!v.code) { showToast('Code is required'); return }
+        saveProgram(index, { name: v.name, code: v.code.toUpperCase(), dept: v.dept, degree: v.degree as Program['degree'], seats: +v.seats || 0, duration: v.duration })
         closeModal()
       }}
     />

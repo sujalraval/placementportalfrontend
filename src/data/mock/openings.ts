@@ -1,4 +1,5 @@
 export interface Opening {
+  id?: string
   role: string
   co: string
   dept: string

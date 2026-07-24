@@ -2,17 +2,25 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import { useToast } from '@/context/ToastContext'
 import { useAuthStore } from '@/store/useAuthStore'
 import { studentApi, mapBackendStudentToFrontend } from '@/api/student'
+import { applicationApi, mapBackendApplicationToFrontend } from '@/api/application'
+import { notificationApi, mapBackendNotificationToFrontend } from '@/api/notification'
+import { supportApi, mapBackendTicketToFrontend, mapBackendSurveyToFrontend } from '@/api/support'
+import { internshipApi } from '@/api/internship'
+import { verificationApi, mapBackendVerificationToFrontend } from '@/api/verification'
+import { trainingApi, mapBackendCourseToFrontend } from '@/api/training'
+import { companyApi, mapBackendCompanyToFrontend } from '@/api/company'
+import { driveApi, mapBackendDriveToFrontend } from '@/api/drive'
 import { ME, type StudentProfile, type ProfileLink, type Skill, type Experience, type Project, type Certification, type Achievement, type Position, type StudentDocument, type Semester } from '@/data/mock/me'
 import { APPS, type Application } from '@/data/mock/applications'
-import { NOTIFS, NOTIF_PREFS, type NotifItem, type NotifPref } from '@/data/mock/notifications'
-import { TRAIN, type TrainingCourse } from '@/data/mock/training'
+import { NOTIF_PREFS, type NotifItem, type NotifPref } from '@/data/mock/notifications'
+import { type TrainingCourse } from '@/data/mock/training'
 import { CVPARAMS, type CvParam } from '@/data/mock/cvParams'
-import { DRIVES, type Drive } from '@/data/mock/drives'
-import { INTERNSHIPS, MY_INTERNS_INITIAL, INTERN_APPROVALS_INITIAL, weeksElapsed, internEligibleDate, fmtDate, type Internship, type MyInternship, type InternApproval } from '@/data/mock/internships'
-import { TICKETS_INITIAL, SURVEYS_INITIAL, type Ticket, type Survey } from '@/data/mock/support'
-import { COMPANIES, type Company } from '@/data/mock/companies'
-import { DVERIFY_INITIAL, type DeptVerifyItem } from '@/data/mock/deptVerify'
-import { MENTEES_INITIAL, type Mentee, type MenteeEvaluation } from '@/data/mock/mentees'
+import { type Drive } from '@/data/mock/drives'
+import { weeksElapsed, internEligibleDate, fmtDate, type Internship, type MyInternship, type InternApproval } from '@/data/mock/internships'
+import { type Ticket, type Survey } from '@/data/mock/support'
+import { type Company } from '@/data/mock/companies'
+import { type DeptVerifyItem } from '@/data/mock/deptVerify'
+import { type Mentee, type MenteeEvaluation } from '@/data/mock/mentees'
 
 type TagKind = 'soft' | 'lang' | 'intr'
 const TAG_KEY: Record<TagKind, 'soft' | 'languages' | 'interests'> = { soft: 'soft', lang: 'languages', intr: 'interests' }
@@ -86,6 +94,7 @@ interface PortalDataValue {
 
   markAllNotificationsRead(): void
   toggleNotifPref(i: number): void
+  markRead(i: number): void
   pushNotification(notif: Omit<NotifItem, 'unread' | 'time'> & { time?: string }): void
 
   setCvParam(i: number, value: number): void
@@ -124,30 +133,67 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
   const { showToast } = useToast()
   const [me, setMe] = useState<StudentProfile>(ME)
   const [apps, setApps] = useState<Application[]>(APPS)
-  const [notifs, setNotifs] = useState<NotifItem[]>(NOTIFS)
+  const [notifs, setNotifs] = useState<NotifItem[]>([])
   const [notifPrefs, setNotifPrefs] = useState<NotifPref[]>(NOTIF_PREFS)
-  const [train] = useState<TrainingCourse[]>(TRAIN)
+  const [train, setTrain] = useState<TrainingCourse[]>([])
   const [cvParams, setCvParams] = useState<CvParam[]>(CVPARAMS)
-  const [drives, setDrives] = useState<Drive[]>(DRIVES)
-  const [myDrives, setMyDrives] = useState<string[]>(['Deloitte'])
-  const [internships, setInternships] = useState<Internship[]>(INTERNSHIPS)
-  const [myInterns, setMyInterns] = useState<MyInternship[]>(MY_INTERNS_INITIAL)
-  const [internApprovals, setInternApprovals] = useState<InternApproval[]>(INTERN_APPROVALS_INITIAL)
-  const [tickets, setTickets] = useState<Ticket[]>(TICKETS_INITIAL)
-  const [surveys, setSurveys] = useState<Survey[]>(SURVEYS_INITIAL)
-  const [companies, setCompanies] = useState<Company[]>(COMPANIES)
-  const [dverify, setDverify] = useState<DeptVerifyItem[]>(DVERIFY_INITIAL)
-  const [mentees, setMentees] = useState<Mentee[]>(MENTEES_INITIAL)
+  const [drives, setDrives] = useState<Drive[]>([])
+  const [myDrives, setMyDrives] = useState<string[]>([])
+  const [internships, setInternships] = useState<Internship[]>([])
+  const [myInterns, setMyInterns] = useState<MyInternship[]>([])
+  const [internApprovals, setInternApprovals] = useState<InternApproval[]>([])
+  const [tickets, setTickets] = useState<Ticket[]>([])
+  const [surveys, setSurveys] = useState<Survey[]>([])
+  const [companies, setCompanies] = useState<Company[]>([])
+  const [dverify, setDverify] = useState<DeptVerifyItem[]>([])
+  const [mentees, setMentees] = useState<Mentee[]>([])
 
   const { user } = useAuthStore()
 
   useEffect(() => {
+    if (!user) return;
+
+    companyApi.list().then(res => setCompanies((res?.data?.data || res?.data || []).map(mapBackendCompanyToFrontend))).catch(console.error);
+    driveApi.list().then(res => setDrives((res?.data?.data || res?.data || []).map(mapBackendDriveToFrontend))).catch(console.error);
+    trainingApi.listCourses().then(res => setTrain((res?.data?.data || res?.data || []).map(mapBackendCourseToFrontend))).catch(console.error);
+    
+    // We only fetch dverify for Coordinator/Admin, but we can just attempt it if logged in
+    if (user.role === 'COORDINATOR' || user.role === 'ADMIN') {
+      verificationApi.list().then(res => setDverify((res?.data?.data || res?.data || []).map(mapBackendVerificationToFrontend))).catch(console.error);
+    }
+
     if (user && user.role === 'STUDENT') {
       studentApi.getMe().then(data => {
         setMe(mapBackendStudentToFrontend(data.data || data))
       }).catch(err => {
         console.error('Failed to load profile:', err)
       })
+
+      internshipApi.listPostings().then(data => {
+        const postings = data.data || data;
+        setInternships(postings.map((p: any) => ({
+           id: p.id, co: p.company?.name, role: p.title, type: p.employmentType, stipend: p.ctc ? `₹${p.ctc} / mo` : 'Unpaid',
+           mode: p.location || 'Remote', minWeeks: 8, affiliation: 'Corporate', applicants: []
+        })));
+      }).catch(console.error);
+
+      if (user?.id) {
+        applicationApi.listMine().then(res => {
+          setApps((res?.data?.data || res?.data || []).map(mapBackendApplicationToFrontend))
+        }).catch(console.error)
+      }
+
+      notificationApi.listMine().then(res => {
+        setNotifs((res?.data?.data || res?.data || []).map(mapBackendNotificationToFrontend))
+      }).catch(console.error)
+
+      supportApi.listTickets().then(res => {
+        setTickets((res?.data?.data || res?.data || []).map(mapBackendTicketToFrontend))
+      }).catch(console.error)
+
+      supportApi.listSurveys().then(res => {
+        setSurveys((res?.data?.data || res?.data || []).map(mapBackendSurveyToFrontend))
+      }).catch(console.error)
     }
   }, [user])
 
@@ -155,8 +201,12 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
     me, apps, notifs, notifPrefs, train, cvParams, drives, myDrives, internships, myInterns, internApprovals, tickets, surveys, companies, dverify, mentees,
 
     promoteCompanyToUniversityWide(i) {
-      setCompanies((list) => list.map((c, idx) => (idx === i ? { ...c, deptScope: 'University-wide' } : c)))
-      showToast(`${companies[i]?.name} promoted to university-wide visibility`)
+      const c = companies[i]
+      if (!c || !c.id) return
+      companyApi.update(c.id, { visibilityScope: 'UNIVERSITY' }).then(() => {
+        setCompanies((list) => list.map((c, idx) => (idx === i ? { ...c, scope: 'University-wide' } : c)))
+        showToast(`${companies[i]?.name} promoted to university-wide visibility`)
+      }).catch(console.error)
     },
     deleteCompany(i) {
       const name = companies[i]?.name
@@ -164,7 +214,10 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       showToast(`${name} removed from your department's recruiter list`)
     },
     addCompanyDirect(company) {
-      setCompanies((list) => [{ ...company, hires: 0, pkg: '—', status: 'Active' }, ...list])
+      companyApi.create(company).then((res) => {
+        setCompanies((list) => [{ ...company, id: (res.data as any)?.id || (res as any).id, hires: 0, pkg: '—', status: 'Active' }, ...list])
+        showToast('Company added successfully')
+      }).catch(console.error)
     },
 
     updatePersonal(fields) {
@@ -224,7 +277,6 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
     },
     setStatus(status) {
       setMe((m) => ({ ...m, status }))
-      // The backend expects UPPERCASE enum usually, e.g. PLACED, UNPLACED
       const backendStatus = status.toUpperCase().replace(' ', '_')
       studentApi.updatePlacementStatus(backendStatus).catch(console.error)
     },
@@ -237,8 +289,6 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       }).catch(console.error)
     },
     editLink(i, link) {
-      // Backend doesn't have an updateLink endpoint, we delete and recreate or if it's there we can use it.
-      // Looking at student.routes.ts, there is NO patch for links. Just POST and DELETE.
       const id = me.links[i]?.id;
       if (id) {
         studentApi.deleteLink(id.toString()).then(() => {
@@ -416,9 +466,6 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
     },
 
     addDocument(doc) {
-      // In a real app, 'doc' would be a File object for upload, but frontend uses mock StudentDocument.
-      // We'll skip the actual file upload logic since mock interface doesn't have a File payload.
-      // We will just do optimistic update.
       setMe((m) => ({ ...m, docs: [...m.docs, doc] }))
     },
     deleteDocument(i) {
@@ -445,21 +492,47 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
     },
 
     withdrawApplication(co) {
-      setApps((a) => a.map((x) => (x.co === co ? { ...x, outcome: 'Withdrawn', note: 'Withdrawn by you' } : x)))
-      showToast(`Application to ${co} withdrawn`)
+      const app = apps.find(a => a.co === co);
+      if (app?.id) {
+        applicationApi.updateStatus(app.id, { status: 'WITHDRAWN' }).then(() => {
+          setApps((a) => a.map((x) => (x.co === co ? { ...x, outcome: 'Withdrawn', note: 'Withdrawn by you' } : x)))
+          showToast(`Application to ${co} withdrawn`)
+        }).catch(err => console.error('Failed to withdraw application:', err))
+      } else {
+        setApps((a) => a.map((x) => (x.co === co ? { ...x, outcome: 'Withdrawn', note: 'Withdrawn by you' } : x)))
+        showToast(`Application to ${co} withdrawn`)
+      }
     },
     acceptOffer(co) {
-      setApps((a) => a.map((x) => (x.co === co && x.outcome === 'Offer' ? { ...x, note: 'Offer accepted · joining ' + co } : x)))
-      setMe((m) => ({ ...m, status: 'Placed' }))
-      showToast('Offer accepted — placement status updated to Placed. Congratulations!')
+      const app = apps.find(a => a.co === co);
+      if (app?.id) {
+        applicationApi.respondToOffer(app.id, { response: 'ACCEPTED' }).then(() => {
+          setApps((a) => a.map((x) => (x.co === co && x.outcome === 'Offer' ? { ...x, note: 'Offer accepted · joining ' + co } : x)))
+          setMe((m) => ({ ...m, status: 'Placed' }))
+          showToast('Offer accepted — placement status updated to Placed. Congratulations!')
+        }).catch(err => console.error('Failed to accept offer:', err))
+      }
     },
 
+    markRead(i) {
+      const notif = notifs[i];
+      if (notif?.id) {
+        notificationApi.markAsRead(notif.id).then(() => {
+          setNotifs(list => list.map((n, idx) => idx === i ? { ...n, unread: false } : n))
+        }).catch(console.error)
+      } else {
+        setNotifs(list => list.map((n, idx) => idx === i ? { ...n, unread: false } : n))
+      }
+    },
     markAllNotificationsRead() {
-      setNotifs((n) => n.map((x) => ({ ...x, unread: false })))
-      showToast('All notifications marked as read')
+      notificationApi.markAllAsRead().then(() => {
+        setNotifs(list => list.map(n => ({ ...n, unread: false })))
+      }).catch(console.error)
     },
     toggleNotifPref(i) {
-      setNotifPrefs((p) => p.map((x, idx) => (idx === i ? { ...x, on: !x.on } : x)))
+      const on = !notifPrefs[i].on;
+      setNotifPrefs(list => list.map((p, idx) => idx === i ? { ...p, on } : p))
+      showToast('Preferences updated')
     },
     pushNotification(notif) {
       setNotifs((n) => [{ ...notif, time: notif.time ?? 'Just now', unread: true }, ...n])
@@ -471,55 +544,77 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
 
     registerDrive(index) {
       const drive = drives[index]
-      if (!drive || myDrives.includes(drive.co)) return
-      setMyDrives((d) => [...d, drive.co])
-      setDrives((ds) => ds.map((d, idx) => (idx === index ? { ...d, reg: d.reg + 1 } : d)))
-      setNotifs((n) => [{ ic: 'cal', type: 'Drive', title: `Registered for ${drive.co} (${drive.date}). Your QR pass will arrive 24h before the drive.`, time: 'Just now', unread: true }, ...n])
-      showToast(`Registered for ${drive.co} — slot confirmed`)
+      if (!drive || !drive.id || myDrives.includes(drive.co)) return
+      
+      driveApi.register(drive.id).then(() => {
+        setMyDrives((d) => [...d, drive.co])
+        setDrives((ds) => ds.map((d, idx) => (idx === index ? { ...d, reg: d.reg + 1 } : d)))
+        setNotifs((n) => [{ id: 'notif-' + Date.now(), ic: 'cal', type: 'Drive', title: `Registered for ${drive.co} (${drive.date}). Your QR pass will arrive 24h before the drive.`, time: 'Just now', unread: true }, ...n])
+        
+        showToast(`Registered for ${drive.co} — slot confirmed`)
+      }).catch(err => {
+        console.error('Failed to register:', err)
+        showToast('Registration failed: ' + (err.response?.data?.message || err.message))
+      })
     },
 
     applyInternship(id) {
       const x = internships.find((i) => i.id === id)
-      if (!x) return
+      if (!x || typeof x.id !== 'string') return
       if (myInterns.some((m) => m.internId === id)) {
         showToast('You have already applied to this internship')
         return
       }
-      setMyInterns((mi) => [{
-        internId: id, role: x.role, co: x.co, type: x.type, stipend: x.stipend, mode: x.mode, affiliation: x.affiliation, minWeeks: x.minWeeks,
-        stage: 'Applied', mentor: null, appliedOn: '08 Jul', reportText: null, certificateIssued: false, approvedOn: null, credits: null,
-      }, ...mi])
-      setInternships((list) => list.map((i) => {
-        if (i.id !== id) return i
-        if (i.applicants.some((a) => a.en === me.en)) return i
-        return { ...i, applicants: [...i.applicants, { en: me.en, name: me.name, stage: 'Applied' }] }
-      }))
-      showToast(`Applied to ${x.role} at ${x.co}`)
+      
+      applicationApi.apply({ postingId: x.id }).then(() => {
+        setMyInterns((mi) => [{
+          internId: id, role: x.role, co: x.co, type: x.type, stipend: x.stipend, mode: x.mode, affiliation: x.affiliation, minWeeks: x.minWeeks,
+          stage: 'Applied', mentor: null, appliedOn: '08 Jul', reportText: null, certificateIssued: false, approvedOn: null, credits: null,
+        }, ...mi])
+        setInternships((list) => list.map((i) => {
+          if (i.id !== id) return i
+          if (i.applicants.some((a) => a.en === me.en)) return i
+          return { ...i, applicants: [...i.applicants, { en: me.en, name: me.name, stage: 'Applied' }] }
+        }))
+        showToast(`Applied to ${x.role} at ${x.co}`)
+      }).catch(err => {
+        console.error('Failed to apply:', err)
+        showToast('Application failed: ' + (err.response?.data?.message || err.message))
+      })
     },
     requestInternshipApproval(i) {
       const mi = myInterns[i]
-      if (!mi) return
-      setMyInterns((list) => list.map((x, idx) => (idx === i ? { ...x, stage: 'Approval Requested' } : x)))
-      setInternships((list) => list.map((x) => (x.id !== mi.internId ? x : {
-        ...x,
-        applicants: x.applicants.map((a) => (a.en === me.en ? { ...a, stage: 'Approval Requested' } : a)),
-      })))
-      setInternApprovals((list) => [{
-        en: me.en, name: me.name, co: mi.co, role: mi.role, type: mi.type, mode: mi.mode, minWeeks: mi.minWeeks, affiliation: mi.affiliation,
-        status: 'Pending', requestedOn: '08 Jul',
-      }, ...list])
-      showToast('College approval letter requested — sent to your department coordinator')
+      if (!mi || typeof mi.internId !== 'string') return
+      
+      internshipApi.requestApproval(mi.internId, { note: 'Requesting approval' }).then(() => {
+        setMyInterns((list) => list.map((x, idx) => (idx === i ? { ...x, stage: 'Approval Requested' } : x)))
+        setInternships((list) => list.map((x) => (x.id !== mi.internId ? x : {
+          ...x,
+          applicants: x.applicants.map((a) => (a.en === me.en ? { ...a, stage: 'Approval Requested' } : a)),
+        })))
+        showToast('College approval letter requested — sent to your department coordinator')
+      }).catch(console.error)
     },
     submitInternshipReport(i, report) {
-      setMyInterns((list) => list.map((x, idx) => (idx === i ? { ...x, reportText: report } : x)))
+      const mi = myInterns[i]
+      if (!mi || typeof mi.internId !== 'string') return
+      
+      internshipApi.submitReport(mi.internId, report).then(() => {
+        setMyInterns((list) => list.map((x, idx) => (idx === i ? { ...x, reportText: report } : x)))
+        showToast('Internship report submitted successfully')
+      }).catch(console.error)
     },
 
     raiseTicket(fields) {
-      const ticket: Ticket = {
-        id: 'TKT-' + (1043 + tickets.length), by: me.name, cat: fields.cat, sub: fields.sub, pri: fields.pri,
-        status: 'In progress', sla: '24h left', owner: 'Cell Desk', date: '08 Jul',
-      }
-      setTickets((t) => [ticket, ...t])
+      supportApi.createTicket({
+        category: fields.cat,
+        subject: fields.sub,
+        description: fields.body || fields.sub,
+        priority: fields.pri.toUpperCase()
+      }).then(res => {
+        setTickets(list => [{ id: (res.data as any)?.id || (res as any).id, by: me.name, cat: fields.cat, sub: fields.sub, pri: fields.pri, status: 'In progress', sla: '24h left', owner: 'Cell Desk', date: '08 Jul' }, ...list])
+        showToast('Ticket submitted successfully')
+      }).catch(console.error)
     },
     resolveTicket(i) {
       setTickets((list) => list.map((t, idx) => (idx === i ? { ...t, status: 'Resolved', sla: 'Met' } : t)))
@@ -579,45 +674,49 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
 
     approveVerification(i) {
       const item = dverify[i]
-      if (!item) return
-      setDverify((list) => list.map((v, idx) => (idx === i ? { ...v, status: 'Approved' } : v)))
-      setNotifs((n) => [{ ic: 'check', type: 'Verified', title: `Your ${item.type.toLowerCase()} ("${item.item}") was verified by your coordinator.`, time: 'Just now', unread: true }, ...n])
-      showToast(`${item.name} — approved & student notified`)
+      if (!item || !item.id) return
+      verificationApi.review(item.id, { status: 'VERIFIED' }).then(() => {
+        setDverify((list) => list.map((v, idx) => (idx === i ? { ...v, status: 'Approved' } : v)))
+        setNotifs((n) => [{ id: 'notif-v-' + Date.now(), ic: 'check', type: 'Verified', title: `Your ${item.type.toLowerCase()} ("${item.item}") was verified by your coordinator.`, time: 'Just now', unread: true }, ...n])
+        showToast(`${item.name} — approved & student notified`)
+      }).catch(console.error)
     },
     rejectVerification(i) {
-      setDverify((list) => list.map((v, idx) => (idx === i ? { ...v, status: 'Rejected' } : v)))
-      showToast(`${dverify[i]?.name} — rejected with remarks`)
+      const item = dverify[i]
+      if (!item || !item.id) return
+      verificationApi.review(item.id, { status: 'REJECTED' }).then(() => {
+        setDverify((list) => list.map((v, idx) => (idx === i ? { ...v, status: 'Rejected' } : v)))
+        showToast(`${dverify[i]?.name} — rejected with remarks`)
+      }).catch(console.error)
     },
 
     rejectInternRequest(i) {
-      setInternApprovals((list) => list.map((r, idx) => (idx === i ? { ...r, status: 'Rejected' } : r)))
-      showToast('Request rejected')
+      const r = internApprovals[i]
+      if (!r || typeof r.id !== 'string') return
+      internshipApi.decideApproval(r.id, { status: 'REJECTED' }).then(() => {
+        setInternApprovals((list) => list.map((x, idx) => (idx === i ? { ...x, status: 'Rejected' } : x)))
+        showToast('Request rejected')
+      }).catch(console.error)
     },
     finalizeInternApproval(i, credits) {
       const r = internApprovals[i]
-      if (!r) return
-      setInternApprovals((list) => list.map((x, idx) => (idx === i ? { ...x, status: 'Approved', ...(credits ? { credits: { course: credits.course || '—', count: +credits.count || 0, evalBasis: credits.evalBasis || '—' } } : {}) } : x)))
-      if (r.en === me.en) {
-        const mappedCredits = credits ? { course: credits.course || '—', count: +credits.count || 0, evalBasis: credits.evalBasis || '—' } : null
-        setMyInterns((list) => list.map((mi) => (mi.co === r.co && mi.role === r.role ? { ...mi, stage: 'Approved', mentor: 'Prof. Kavita Iyer', approvedOn: new Date().toISOString(), credits: mappedCredits ?? mi.credits } : mi)))
-        setInternships((list) => list.map((x) => ({ ...x, applicants: x.applicants.map((a) => (a.en === me.en ? { ...a, stage: 'Approved' } : a)) })))
-        setMentees((list) => {
-          const existing = list.find((m) => m.en === me.en && m.co === r.co && m.role === r.role)
-          if (existing) return list.map((m) => (m === existing ? { ...m, stage: 'Ongoing' } : m))
-          return [{ en: me.en, name: me.name, co: r.co, role: r.role, stage: 'Ongoing', minWeeks: r.minWeeks, reportSubmitted: false, evaluation: null }, ...list]
-        })
-        setNotifs((n) => [{ ic: 'shield', type: 'Internship', title: `College approval letter issued for your ${r.co} internship. You may now join.`, time: 'Just now', unread: true }, ...n])
-      }
-      showToast(`${r.name} — approved${credits ? ` · ${credits.count} credits mapped` : ''}, mentor assigned, letter issued`)
+      if (!r || typeof r.id !== 'string') return
+      
+      const mappedCredits = credits ? { course: credits.course || '—', count: +credits.count || 0, evalBasis: credits.evalBasis || '—' } : null
+      internshipApi.decideApproval(r.id, { status: 'APPROVED' }).then(() => {
+        setInternApprovals((list) => list.map((x, idx) => (idx === i ? { ...x, status: 'Approved', ...(credits ? { credits: mappedCredits } : {}) } : x)))
+        showToast(`${r.name} — approved${credits ? ` · ${credits.count} credits mapped` : ''}, mentor assigned, letter issued`)
+      }).catch(console.error)
     },
 
     saveFacultyEvaluation(i, evaluation) {
       const mentee = mentees[i]
-      setMentees((list) => list.map((m, idx) => (idx === i ? { ...m, evaluation } : m)))
-      if (mentee?.en === me.en) {
-        setNotifs((n) => [{ ic: 'check', type: 'Internship', title: `Faculty evaluation recorded for your ${mentee.co} internship: ${evaluation.grade} (${evaluation.marks}/100).`, time: 'Just now', unread: true }, ...n])
-      }
-      showToast(`Evaluation saved for ${mentee?.name}`)
+      if (!mentee || typeof mentee.id !== 'string') return
+      
+      internshipApi.evaluateInternship(mentee.id, { grade: evaluation.grade, marks: evaluation.marks }).then(() => {
+        setMentees((list) => list.map((m, idx) => (idx === i ? { ...m, evaluation } : m)))
+        showToast(`Evaluation saved for ${mentee?.name}`)
+      }).catch(console.error)
     },
   }
 

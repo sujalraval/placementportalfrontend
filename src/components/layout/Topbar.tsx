@@ -7,9 +7,12 @@ interface TopbarProps {
 }
 
 export function Topbar({ onMenuClick }: TopbarProps) {
-  const { persona } = useParams<{ persona: string }>()
+  const { persona, role } = useParams<{ persona?: string; role?: string }>()
   const navigate = useNavigate()
-  const active = persona ?? 'website'
+  
+  let active = persona ?? role ?? 'website'
+  if (active === 'department') active = 'dept'
+  if (active === 'erp') active = 'admin'
 
   const goToPersona = (key: PersonaKey | 'website') => {
     if (key === 'website') {

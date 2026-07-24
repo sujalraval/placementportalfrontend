@@ -26,7 +26,7 @@ export default function AdminDeptsPage() {
           <thead><tr>{['Department', 'Coordinator', 'Students', 'Placed', 'Rate', ''].map((h) => <th key={h} className="border-b border-line bg-paper px-3.5 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-[.1em] text-muted">{h}</th>)}</tr></thead>
           <tbody>
             {depts.map((d, i) => {
-              const p = Math.round((d.placed / d.total) * 100)
+              const p = d.total > 0 ? Math.round((d.placed / d.total) * 100) : 0
               return (
                 <tr key={d.name}>
                   <td className="border-b border-line-2 px-3.5 py-3"><b className="text-[13.5px]">{d.name}</b></td>

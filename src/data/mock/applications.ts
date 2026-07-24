@@ -1,4 +1,5 @@
 export interface Application {
+  id?: string
   role: string
   co: string
   ctc: string

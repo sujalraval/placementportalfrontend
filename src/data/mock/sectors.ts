@@ -1,4 +1,5 @@
 export interface Sector {
+  id?: string
   name: string
   companies: number
   openings: number

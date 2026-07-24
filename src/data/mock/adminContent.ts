@@ -1,4 +1,5 @@
 export interface AdminEvent {
+  id?: string
   title: string
   date: string
   mode: 'On-campus' | 'Webinar' | 'Off-campus' | 'Virtual'
@@ -13,6 +14,7 @@ export const EVENTS_INITIAL: AdminEvent[] = [
 ]
 
 export interface AdminBroadcast {
+  id?: string
   title: string
   audience: string
   channel: string

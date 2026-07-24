@@ -35,7 +35,7 @@ export const authApi = {
       url = '/auth/register/student';
       // Mock required fields if missing from UI
       body.enrollmentNo = body.enrollmentNo || `ENR${Math.floor(Math.random() * 100000)}`;
-      body.departmentId = body.departmentId || '611c3ed5-cd59-47b1-b3c1-8b5ebb66ab32'; // Valid department ID
+      body.departmentId = body.departmentId || 'd0092834-0c99-4d09-9d5d-f7551f1b54cc'; // Valid department ID
       body.batchStartYear = body.batchStartYear || 2022;
       body.batchEndYear = body.batchEndYear || 2026;
     } else if (payload.role === 'RECRUITER') {

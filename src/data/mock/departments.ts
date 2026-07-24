@@ -1,5 +1,7 @@
 export interface Department {
+  id?: string
   name: string
+  code?: string
   total: number
   placed: number
   coord: string
