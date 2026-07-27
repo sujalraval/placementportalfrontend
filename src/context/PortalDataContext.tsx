@@ -45,7 +45,7 @@ interface PortalDataValue {
 
   promoteCompanyToUniversityWide(i: number): void
   deleteCompany(i: number): void
-  addCompanyDirect(company: Omit<Company, 'hires' | 'pkg' | 'status'>): void
+  addCompanyDirect(company: Omit<Company, 'hires' | 'pkg' | 'status'>): Promise<void>
 
   updatePersonal(fields: Partial<Pick<StudentProfile, 'name' | 'dob' | 'gender' | 'category' | 'city' | 'email' | 'phone' | 'linkedin' | 'github' | 'address'>>): void
   updateAbout(headline: string, summary: string): void
@@ -100,6 +100,7 @@ interface PortalDataValue {
   setCvParam(i: number, value: number): void
 
   registerDrive(index: number): void
+  addDrive(data: { companyId: string, title: string, date: string, mode: string, depts: string, rounds: string }): Promise<void>
 
   applyInternship(id: number): void
   requestInternshipApproval(i: number): void
@@ -214,10 +215,21 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       showToast(`${name} removed from your department's recruiter list`)
     },
     addCompanyDirect(company) {
-      companyApi.create(company).then((res) => {
-        setCompanies((list) => [{ ...company, id: (res.data as any)?.id || (res as any).id, hires: 0, pkg: '—', status: 'Active' }, ...list])
-        showToast('Company added successfully')
-      }).catch(console.error)
+      const slug = company.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const backendData: any = {
+        name: company.name,
+        slug,
+        type: company.type === 'Employer' ? 'DIRECT_EMPLOYER' : company.type === 'Agency' ? 'RECRUITMENT_AGENCY' : 'INDIVIDUAL_AGENT',
+        visibilityScope: company.deptScope === 'University-wide' ? 'UNIVERSITY_WIDE' : 'DEPARTMENT_ONLY',
+      };
+      
+      return companyApi.create(backendData).then((res) => {
+        setCompanies((list) => [{ ...company, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id, hires: 0, pkg: '—', status: 'Active' }, ...list])
+      }).catch((err) => {
+        console.error("API ERROR:", err.response?.data);
+        showToast(err.response?.data?.error?.message || 'Failed to add company');
+        throw err;
+      })
     },
 
     updatePersonal(fields) {
@@ -556,6 +568,36 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
         console.error('Failed to register:', err)
         showToast('Registration failed: ' + (err.response?.data?.message || err.message))
       })
+    },
+
+    addDrive(data) {
+      const backendData = {
+        companyId: data.companyId,
+        title: data.title,
+        driveDate: new Date(data.date).toISOString(),
+        mode: data.mode,
+      };
+      
+      return driveApi.create(backendData).then((res) => {
+        const driveInfo = res.data?.data || res.data || res;
+        const companyName = companies.find(c => c.id === data.companyId)?.name || 'Unknown';
+        
+        setDrives(list => [{
+          id: driveInfo.id,
+          co: companyName,
+          title: data.title,
+          date: new Date(data.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+          depts: data.depts,
+          rounds: data.rounds,
+          reg: 0,
+          status: 'Upcoming'
+        }, ...list]);
+        showToast('Drive scheduled successfully');
+      }).catch((err) => {
+        console.error('API ERROR:', err.response?.data);
+        showToast(err.response?.data?.error?.message || 'Failed to schedule drive');
+        throw err;
+      });
     },
 
     applyInternship(id) {

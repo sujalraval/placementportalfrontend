@@ -29,6 +29,9 @@ export const adminApi = {
   createSector: (data: any) => apiClient.post('/sectors', data),
   updateSector: (id: string, data: any) => apiClient.patch(`/sectors/${id}`, data),
   deleteSector: (id: string) => apiClient.delete(`/sectors/${id}`),
+
+  // Reports
+  getSelectionFunnel: () => apiClient.get('/reports/analytics/funnel'),
 };
 
   export const mapBackendUserToAdminUser = (data: any): AdminUser & { id: string } => {

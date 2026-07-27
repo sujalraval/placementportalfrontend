@@ -2,19 +2,20 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pill } from '@/components/ui/Pill'
 import { PageHead } from '@/components/shared/PageHead'
-import { useToast } from '@/context/ToastContext'
+import { useModal } from '@/context/ModalContext'
 import { usePortalData } from '@/context/PortalDataContext'
+import { AdminScheduleDriveModal } from '@/components/modals/AdminScheduleDriveModal'
 
 export default function AdminDrivesPage() {
   const { drives } = usePortalData()
-  const { showToast } = useToast()
+  const { openModal } = useModal()
 
   return (
     <div>
       <PageHead
         title="Campus drives"
         description="Scheduling across departments with clash detection"
-        actions={<Button variant="gold" onClick={() => showToast('New drive — pick company & date')}>Schedule drive</Button>}
+        actions={<Button variant="gold" onClick={() => openModal('Schedule campus drive', <AdminScheduleDriveModal />)}>Schedule drive</Button>}
       />
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[600px] border-collapse text-[13px]">

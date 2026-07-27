@@ -43,11 +43,14 @@ export function DirectOnboardModal({ scope }: DirectOnboardModalProps) {
           : (v.deptScope === 'University-wide (all departments)' ? 'University-wide' : (v.deptScope || 'University-wide'))
         addCompanyDirect({
           name: v.name, sector: v.sector || '—', type: tcode as 'Employer' | 'Agency' | 'Agent',
-          source: (scope === 'dept' ? 'Onboarded by Dept. Coordinator' : 'Onboarded by Admin') + ' · no registration required',
+          source: (scope === 'dept' ? 'Onboarded by Dept. Coordinator' : 'Onboarded by Admin') + ' — no registration required',
           deptScope,
+        }).then(() => {
+          closeModal()
+          showToast(`${v.name} onboarded directly — ${deptScope === 'University-wide' ? 'visible university-wide' : `visible only to ${deptScope}`}, access granted immediately`)
+        }).catch(() => {
+          // Toast is handled in addCompanyDirect
         })
-        closeModal()
-        showToast(`${v.name} onboarded directly — ${deptScope === 'University-wide' ? 'visible university-wide' : `visible only to ${deptScope}`}, access granted immediately`)
       }}
     />
   )

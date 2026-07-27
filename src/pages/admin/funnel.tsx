@@ -1,26 +1,27 @@
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { PageHead } from '@/components/shared/PageHead'
 import { SectionTitle } from '@/components/shared/SectionCard'
 import { useToast } from '@/context/ToastContext'
-import { useRecruiterData } from '@/context/RecruiterDataContext'
-import { funnelCounts } from '@/data/mock/candidates'
-
-const OTHER_ROWS = [
-  { label: 'Deloitte · Data Analyst', data: { applied: 142, appeared: 118, tech: 64, hr: 31, offer: 14, joined: 11 } },
-  { label: 'HDFC Bank · Mgmt Trainee', data: { applied: 210, appeared: 176, tech: 92, hr: 48, offer: 20, joined: 17 } },
-  { label: 'Amazon · Cloud Engineer', data: { applied: 97, appeared: 80, tech: 34, hr: 18, offer: 9, joined: 0 } },
-]
+import { adminApi } from '@/api/admin'
 
 function pct(a: number, b: number) {
   return b ? Math.round((a / b) * 100) + '%' : '—'
 }
 
 export default function AdminFunnelPage() {
-  const { recCands } = useRecruiterData()
   const { showToast } = useToast()
-  const f = funnelCounts(recCands)
-  const rows = [{ label: 'TCS · Software Engineer', data: f }, ...OTHER_ROWS]
+  const [rows, setRows] = useState<any[]>([])
+
+  useEffect(() => {
+    adminApi.getSelectionFunnel().then(res => {
+      setRows(res.data.data || [])
+    }).catch(err => {
+      console.error(err)
+      showToast('Failed to load funnel data')
+    })
+  }, [])
 
   return (
     <div>
