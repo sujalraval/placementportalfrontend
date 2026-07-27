@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pill } from '@/components/ui/Pill'
-import { PageHead } from '@/components/shared/PageHead'
 import { IconControlButton } from '@/components/shared/IconControls'
 import { useModal } from '@/context/ModalContext'
 import { useAdminData } from '@/context/AdminDataContext'
@@ -12,12 +11,11 @@ export default function AdminSectorsPage() {
   const { openModal } = useModal()
 
   return (
-    <div>
-      <PageHead
-        title="Sectors"
-        description="Industry sectors used across companies and job openings"
-        actions={<Button variant="gold" onClick={() => openModal('Add sector', <SectorFormModal index={-1} />)}>Add sector</Button>}
-      />
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-[15px] font-bold text-navy">Sectors</h2>
+        <Button variant="gold" size="sm" onClick={() => openModal('Add sector', <SectorFormModal index={-1} />)}>Add sector</Button>
+      </div>
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[600px] border-collapse text-[13px]">
           <thead><tr>{['Sector', 'Companies', 'Open positions', 'Status', ''].map((h) => <th key={h} className="border-b border-line bg-paper px-3.5 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-[.1em] text-muted">{h}</th>)}</tr></thead>

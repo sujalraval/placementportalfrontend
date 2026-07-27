@@ -4,6 +4,7 @@ export interface NewsItem {
   cat: string
   title: string
   body: string
+  attachmentUrl?: string
 }
 
 export const NEWS: NewsItem[] = [

@@ -5,6 +5,11 @@ export interface Department {
   total: number
   placed: number
   coord: string
+  contactEmail?: string
+  contactPhone?: string
+  coordName?: string
+  coordEmail?: string
+  coordPhone?: string
 }
 
 export const DEPTS: Department[] = [

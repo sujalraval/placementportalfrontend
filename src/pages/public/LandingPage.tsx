@@ -3,7 +3,6 @@ import { Hero } from '@/components/landing/Hero'
 import { StatsStrip } from '@/components/landing/StatsStrip'
 import { OfficerBand } from '@/components/landing/OfficerBand'
 import { AboutSection } from '@/components/landing/AboutSection'
-import { TeamSection } from '@/components/landing/TeamSection'
 import { GallerySection } from '@/components/landing/GallerySection'
 import { NewsSection } from '@/components/landing/NewsSection'
 import { JobsSection } from '@/components/landing/JobsSection'
@@ -24,7 +23,6 @@ export function LandingPage() {
       <StatsStrip />
       <OfficerBand />
       <AboutSection />
-      <TeamSection />
       <GallerySection />
       <NewsSection />
       <JobsSection />

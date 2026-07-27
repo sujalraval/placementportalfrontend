@@ -45,7 +45,7 @@ interface PortalDataValue {
 
   promoteCompanyToUniversityWide(i: number): void
   deleteCompany(i: number): void
-  addCompanyDirect(company: Omit<Company, 'hires' | 'pkg' | 'status'>): Promise<void>
+  addCompanyDirect(company: any): Promise<void>
 
   updatePersonal(fields: Partial<Pick<StudentProfile, 'name' | 'dob' | 'gender' | 'category' | 'city' | 'email' | 'phone' | 'linkedin' | 'github' | 'address'>>): void
   updateAbout(headline: string, summary: string): void
@@ -214,17 +214,18 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       setCompanies((list) => list.filter((_, idx) => idx !== i))
       showToast(`${name} removed from your department's recruiter list`)
     },
-    addCompanyDirect(company) {
+    addCompanyDirect(company: any) {
       const slug = company.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const backendData: any = {
         name: company.name,
         slug,
         type: company.type === 'Employer' ? 'DIRECT_EMPLOYER' : company.type === 'Agency' ? 'RECRUITMENT_AGENCY' : 'INDIVIDUAL_AGENT',
-        visibilityScope: company.deptScope === 'University-wide' ? 'UNIVERSITY_WIDE' : 'DEPARTMENT_ONLY',
       };
+      if (company.sectorIds) backendData.sectorIds = company.sectorIds;
+      if (company.visibilityScopes) backendData.visibilityScopes = company.visibilityScopes;
       
       return companyApi.create(backendData).then((res) => {
-        setCompanies((list) => [{ ...company, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id, hires: 0, pkg: '—', status: 'Active' }, ...list])
+        setCompanies((list) => [{ ...company, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id, hires: 0, pkg: '-', status: 'Active' }, ...list])
       }).catch((err) => {
         console.error("API ERROR:", err.response?.data);
         showToast(err.response?.data?.error?.message || 'Failed to add company');

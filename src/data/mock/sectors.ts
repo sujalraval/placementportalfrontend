@@ -4,6 +4,10 @@ export interface Sector {
   companies: number
   openings: number
   status: 'Active' | 'Inactive'
+  industryRelevance?: string[]
+  industryDomains?: string[]
+  industrySubDomains?: string[]
+  applicationAreas?: string[]
 }
 
 export const SECTORS_INITIAL: Sector[] = [

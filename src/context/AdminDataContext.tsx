@@ -11,6 +11,7 @@ import { type Department } from '@/data/mock/departments'
 import { type Program } from '@/data/mock/programs'
 import { type AdminUser } from '@/data/mock/users'
 import { type Sector } from '@/data/mock/sectors'
+import { type Skill } from '@/data/mock/skills'
 import { type Opening } from '@/data/mock/openings'
 import { EMPLOYMENT_OUTCOMES_INITIAL, type EmploymentOutcome } from '@/data/mock/outcomes'
 
@@ -22,6 +23,7 @@ interface AdminDataValue {
   programs: Program[]
   users: AdminUser[]
   sectors: Sector[]
+  skills: Skill[]
   openings: Opening[]
   employmentOutcomes: EmploymentOutcome[]
 
@@ -47,6 +49,9 @@ interface AdminDataValue {
   saveSector(i: number, sector: Sector): void
   deleteSector(i: number): void
 
+  saveSkill(i: number, skill: Skill): void
+  deleteSkill(i: number): void
+
   saveOpening(i: number, opening: Omit<Opening, 'apps' | 'status'>, status: Opening['status']): void
   approveOpening(i: number): void
   publishOpening(i: number): void
@@ -70,6 +75,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const [programs, setPrograms] = useState<Program[]>([])
   const [users, setUsers] = useState<AdminUser[]>([])
   const [sectors, setSectors] = useState<Sector[]>([])
+  const [skills, setSkills] = useState<Skill[]>([])
   const [openings, setOpenings] = useState<Opening[]>([])
   const [employmentOutcomes, setEmploymentOutcomes] = useState<EmploymentOutcome[]>(EMPLOYMENT_OUTCOMES_INITIAL)
 
@@ -88,6 +94,10 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
 
     adminApi.listSectors().then(res => {
       setSectors((res?.data?.data || res?.data || []).map(mapBackendSectorToFrontend));
+    }).catch(console.error);
+
+    adminApi.listSkills().then(res => {
+      setSkills(res?.data?.data || res?.data || []);
     }).catch(console.error);
 
     adminApi.listUsers().then(res => {
@@ -115,7 +125,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const value: AdminDataValue = {
-    news, events, adminNotifs, depts, programs, users, sectors, openings, employmentOutcomes,
+    news, events, adminNotifs, depts, programs, users, sectors, skills, openings, employmentOutcomes,
 
     saveNews(i, item) {
       const payload = {
@@ -193,13 +203,22 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     },
 
     saveDept(i, dept) {
+      const payload = {
+        name: dept.name,
+        code: dept.code,
+        contactEmail: dept.contactEmail,
+        contactPhone: dept.contactPhone,
+        coordinatorName: dept.coordName || dept.coord,
+        coordinatorEmail: dept.coordEmail,
+        coordinatorPhone: dept.coordPhone,
+      }
       if (i >= 0 && depts[i]?.id) {
-        adminApi.updateDepartment(depts[i].id!, { name: dept.name, code: dept.code }).then(() => {
+        adminApi.updateDepartment(depts[i].id!, payload).then(() => {
           setDepts((list) => list.map((d, idx) => (idx === i ? dept : d)))
           showToast('Department updated')
         }).catch(console.error)
       } else {
-        adminApi.createDepartment({ name: dept.name, code: dept.code }).then(res => {
+        adminApi.createDepartment(payload).then(res => {
           setDepts((list) => [{ ...dept, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id }, ...list])
           showToast('Department added')
         }).catch((err) => {
@@ -218,23 +237,27 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     },
 
     saveProgram(i, program) {
+      const payload = {
+        departmentId: depts.find(d => d.name === program.dept)?.id,
+        name: program.name, 
+        code: program.code,
+        degreeLevel: program.degree,
+        durationYears: parseInt(program.duration) || 3,
+        totalSemesters: (parseInt(program.duration) || 3) * 2,
+        skills: program.skills,
+        sectors: program.sectors,
+        subSectors: program.subSectors,
+        industry: program.industry,
+        domain: program.domain,
+        subDomain: program.subDomain
+      }
       if (i >= 0 && programs[i]?.id) {
-        adminApi.updateProgram(programs[i].id!, { name: program.name, code: program.code }).then(() => {
+        adminApi.updateProgram(programs[i].id!, payload).then(() => {
           setPrograms((list) => list.map((p, idx) => (idx === i ? program : p)))
           showToast('Program updated')
         }).catch(console.error)
       } else {
-        const deptObj = depts.find(d => d.name === program.dept)
-        const durationYears = parseInt(program.duration) || 3
-        
-        adminApi.createProgram({ 
-          departmentId: deptObj?.id, 
-          name: program.name, 
-          code: program.code,
-          degreeLevel: program.degree,
-          durationYears,
-          totalSemesters: durationYears * 2
-        }).then(res => {
+        adminApi.createProgram(payload).then(res => {
           setPrograms((list) => [{ ...program, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id }, ...list])
           showToast('Program added')
         }).catch((err) => {
@@ -321,13 +344,20 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     },
 
     saveSector(i, sector) {
+      const payload = {
+        name: sector.name,
+        industryRelevance: sector.industryRelevance,
+        industryDomains: sector.industryDomains,
+        industrySubDomains: sector.industrySubDomains,
+        applicationAreas: sector.applicationAreas
+      }
       if (i >= 0 && sectors[i]?.id) {
-        adminApi.updateSector(sectors[i].id!, { name: sector.name }).then(() => {
+        adminApi.updateSector(sectors[i].id!, payload).then(() => {
           setSectors((list) => list.map((s, idx) => (idx === i ? sector : s)))
           showToast('Sector updated')
         }).catch(console.error)
       } else {
-        adminApi.createSector({ name: sector.name }).then(res => {
+        adminApi.createSector(payload).then(res => {
           setSectors((list) => [{ ...sector, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id }, ...list])
           showToast('Sector added')
         }).catch(console.error)
@@ -338,6 +368,28 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         adminApi.deleteSector(sectors[i].id!).then(() => {
           setSectors((list) => list.filter((_, idx) => idx !== i))
           showToast('Sector removed')
+        }).catch(console.error)
+      }
+    },
+
+    saveSkill(i, skill) {
+      if (i >= 0 && skills[i]?.id) {
+        adminApi.updateSkill(skills[i].id!, { name: skill.name, description: skill.description, category: skill.category }).then(() => {
+          setSkills((list) => list.map((s, idx) => (idx === i ? skill : s)))
+          showToast('Skill updated')
+        }).catch(console.error)
+      } else {
+        adminApi.createSkill({ name: skill.name, description: skill.description || '', category: skill.category }).then(res => {
+          setSkills((list) => [{ ...skill, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id }, ...list])
+          showToast('Skill added')
+        }).catch(console.error)
+      }
+    },
+    deleteSkill(i) {
+      if (skills[i]?.id) {
+        adminApi.deleteSkill(skills[i].id!).then(() => {
+          setSkills((list) => list.filter((_, idx) => idx !== i))
+          showToast('Skill removed')
         }).catch(console.error)
       }
     },

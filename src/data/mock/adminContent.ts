@@ -5,6 +5,7 @@ export interface AdminEvent {
   mode: 'On-campus' | 'Webinar' | 'Off-campus' | 'Virtual'
   dept: string
   status: 'Upcoming' | 'Completed'
+  attachmentUrl?: string
 }
 
 export const EVENTS_INITIAL: AdminEvent[] = [

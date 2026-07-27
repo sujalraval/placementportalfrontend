@@ -1,27 +1,25 @@
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { PageHead } from '@/components/shared/PageHead'
 import { SectionTitle } from '@/components/shared/SectionCard'
 import { IconControlButton } from '@/components/shared/IconControls'
 import { useModal } from '@/context/ModalContext'
 import { useAdminData } from '@/context/AdminDataContext'
 import { DeptFormModal } from '@/components/modals/DeptFormModal'
 import { ProgramFormModal } from '@/components/modals/ProgramFormModal'
+import { SkillFormModal } from '@/components/modals/SkillFormModal'
+import { SectorFormModal } from '@/components/modals/SectorFormModal'
 
 export default function AdminDeptsPage() {
   const { depts, programs, deleteDept, deleteProgram } = useAdminData()
   const { openModal } = useModal()
 
   return (
-    <div>
-      <PageHead
-        title="Departments & programs"
-        description="Manage departments, coordinators, and academic programs"
-        actions={<Button variant="gold" onClick={() => openModal('Add department', <DeptFormModal index={-1} />)}>Add department</Button>}
-      />
-
+    <div className="flex flex-col gap-8">
       <Card className="mb-[18px] overflow-x-auto">
-        <div className="p-[18px] pb-0"><SectionTitle title="Departments" /></div>
+        <div className="p-[18px] pb-0 flex items-center justify-between">
+          <SectionTitle title="Departments" />
+          <Button size="sm" variant="gold" onClick={() => openModal('Add department', <DeptFormModal index={-1} />)}>Add department</Button>
+        </div>
         <table className="w-full min-w-[600px] border-collapse text-[13px]">
           <thead><tr>{['Department', 'Coordinator', 'Students', 'Placed', 'Rate', ''].map((h) => <th key={h} className="border-b border-line bg-paper px-3.5 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-[.1em] text-muted">{h}</th>)}</tr></thead>
           <tbody>
@@ -52,7 +50,16 @@ export default function AdminDeptsPage() {
         </table>
       </Card>
 
-      <SectionTitle title="Academic programs" action={<button onClick={() => openModal('Add program', <ProgramFormModal index={-1} />)} className="text-[12.5px] font-semibold text-navy hover:underline">Add program</button>} />
+      <SectionTitle 
+        title="Academic programs" 
+        action={
+          <div className="flex gap-4">
+            <button onClick={() => openModal('Add sector', <SectorFormModal index={-1} />)} className="text-[12.5px] font-semibold text-navy hover:underline">Add Sector</button>
+            <button onClick={() => openModal('Add skill', <SkillFormModal index={-1} />)} className="text-[12.5px] font-semibold text-navy hover:underline">Add Skill</button>
+            <button onClick={() => openModal('Add program', <ProgramFormModal index={-1} />)} className="text-[12.5px] font-semibold text-navy hover:underline">Add Programme</button>
+          </div>
+        } 
+      />
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[600px] border-collapse text-[13px]">
           <thead><tr>{['Program', 'Department', 'Level', 'Seats', 'Duration', ''].map((h) => <th key={h} className="border-b border-line bg-paper px-3.5 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-[.1em] text-muted">{h}</th>)}</tr></thead>

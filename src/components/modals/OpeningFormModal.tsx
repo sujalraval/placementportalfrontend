@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
-import { Field, Input } from '@/components/ui/Field'
+import { Field, Input, Select } from '@/components/ui/Field'
 import { useModal } from '@/context/ModalContext'
 import { useToast } from '@/context/ToastContext'
 import { useAdminData } from '@/context/AdminDataContext'
+import { usePortalData } from '@/context/PortalDataContext'
 import type { Opening } from '@/data/mock/openings'
 
 export function OpeningFormModal({ index, item }: { index: number; item?: Opening }) {
   const { closeModal } = useModal()
   const { showToast } = useToast()
   const { saveOpening } = useAdminData()
+  const { companies } = usePortalData()
 
   const [values, setValues] = useState({
     role: item?.role ?? '', co: item?.co ?? '', ctc: item?.ctc ?? '',
@@ -27,7 +29,12 @@ export function OpeningFormModal({ index, item }: { index: number; item?: Openin
     <div>
       <div className="grid grid-cols-2 gap-x-4">
         <Field label="Role" full><Input value={values.role} onChange={(e) => set('role', e.target.value)} /></Field>
-        <Field label="Company"><Input value={values.co} onChange={(e) => set('co', e.target.value)} /></Field>
+        <Field label="Company">
+          <Select value={values.co} onChange={(e) => set('co', e.target.value)}>
+            <option value="">Select a company</option>
+            {companies.map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
+          </Select>
+        </Field>
         <Field label="CTC / Stipend"><Input placeholder="₹7.0 LPA" value={values.ctc} onChange={(e) => set('ctc', e.target.value)} /></Field>
         <Field label="Eligible departments" full><Input value={values.dept} onChange={(e) => set('dept', e.target.value)} /></Field>
         <Field label="Openings"><Input placeholder="10" value={values.openings} onChange={(e) => set('openings', e.target.value)} /></Field>

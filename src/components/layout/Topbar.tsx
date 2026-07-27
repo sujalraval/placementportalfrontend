@@ -35,12 +35,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           </button>
         )}
         <Link to="/" className="flex items-center gap-3">
-          <svg className="h-10 w-10 flex-none" viewBox="0 0 100 100" aria-hidden="true">
-            <circle cx="50" cy="50" r="48" fill="#14315E" />
-            <circle cx="50" cy="50" r="40.5" fill="none" stroke="#B07A1E" strokeWidth={1.4} />
-            <text x="50" y="47" textAnchor="middle" fontFamily="Georgia,serif" fontSize={30} fontWeight={700} fill="#fff">GU</text>
-            <text x="50" y="63" textAnchor="middle" fontFamily="Georgia,serif" fontSize={9} letterSpacing={1.5} fill="#B07A1E">1949</text>
-          </svg>
+          <img src="/gu-logo.png" alt="GU Logo" className="h-[46px] w-auto flex-none object-contain bg-white rounded p-0.5" />
           <div>
             <small className="block text-[10px] uppercase tracking-[.18em] text-[#C9D4E6]">Gujarat University · Ahmedabad</small>
             <b className="font-serif text-[17px] font-semibold tracking-[.2px]">Placement Portal</b>

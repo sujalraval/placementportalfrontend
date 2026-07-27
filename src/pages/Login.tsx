@@ -79,8 +79,9 @@ export default function Login() {
           <>
             <div className="mt-6 flex flex-col gap-3">
               <button
+                disabled
                 onClick={() => handleOAuth('google')}
-                className="w-full flex items-center justify-center py-2 px-4 border border-line rounded text-sm font-medium text-ink bg-white hover:bg-paper transition-colors"
+                className="w-full flex items-center justify-center py-2 px-4 border border-line rounded text-sm font-medium text-ink bg-white hover:bg-paper transition-colors opacity-50 cursor-not-allowed"
               >
                 {/* SVG inline for Google logo */}
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -89,27 +90,29 @@ export default function Login() {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
-                Continue with Google
+                Continue with Google (Coming soon)
               </button>
               
               <button
+                disabled
                 onClick={() => handleOAuth('microsoft')}
-                className="w-full flex items-center justify-center py-2 px-4 border border-line rounded text-sm font-medium text-ink bg-white hover:bg-paper transition-colors"
+                className="w-full flex items-center justify-center py-2 px-4 border border-line rounded text-sm font-medium text-ink bg-white hover:bg-paper transition-colors opacity-50 cursor-not-allowed"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M11.4 24H0V12.6H11.4V24ZM24 24H12.6V12.6H24V24ZM11.4 11.4H0V0H11.4V11.4ZM24 11.4H12.6V0H24V11.4Z" fill="#00A4EF"/>
                 </svg>
-                Continue with Microsoft
+                Continue with Microsoft (Coming soon)
               </button>
               
               <button
+                disabled
                 onClick={() => handleOAuth('linkedin')}
-                className="w-full flex items-center justify-center py-2 px-4 border border-line rounded text-sm font-medium text-ink bg-white hover:bg-paper transition-colors"
+                className="w-full flex items-center justify-center py-2 px-4 border border-line rounded text-sm font-medium text-ink bg-white hover:bg-paper transition-colors opacity-50 cursor-not-allowed"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M5.31195 23.9961H0.28125V7.95703H5.31195V23.9961ZM2.79375 5.76562C1.17188 5.76562 0 4.69531 0 3.35156C0 1.97344 1.20469 0.9375 2.86172 0.9375C4.51641 0.9375 5.65547 1.97344 5.68828 3.35156C5.68828 4.69531 4.54922 5.76562 2.79375 5.76562ZM23.9977 23.9961H18.9698V15.5414C18.9698 13.4203 18.2039 11.9719 16.2914 11.9719C14.8313 11.9719 13.9711 12.9516 13.5891 13.9031C13.4531 14.2383 13.4175 14.707 13.4175 15.1781V23.9984H8.38828C8.38828 23.9984 8.45625 9.37031 8.38828 7.95937H13.4175V10.2305C14.0855 9.20156 15.2761 7.73438 17.9292 7.73438C21.2217 7.73438 23.9977 9.88594 23.9977 14.7117V23.9961Z" fill="#0A66C2"/>
                 </svg>
-                Continue with LinkedIn
+                Continue with LinkedIn (Coming soon)
               </button>
             </div>
 

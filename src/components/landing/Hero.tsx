@@ -11,6 +11,9 @@ export function Hero() {
   return (
     <section className="grid grid-cols-[1.15fr_.85fr] items-center gap-10 px-[30px] pb-10 pt-[54px] max-lg:grid-cols-1 max-lg:px-4 max-lg:pt-[34px]">
       <div>
+        <div className="mb-6">
+          <img src="/gu-logo.png" alt="Gujarat University Logo" className="h-[120px] w-auto object-contain" />
+        </div>
         <span className="eyebrow">Training &amp; Placement Cell · Est. 1949</span>
         <h1 className="mt-2 text-[46px] tracking-[-.5px] max-lg:text-[36px]">
           Where Gujarat University talent meets <em className="not-italic text-gold">opportunity.</em>

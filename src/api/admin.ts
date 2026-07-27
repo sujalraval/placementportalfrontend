@@ -30,6 +30,18 @@ export const adminApi = {
   updateSector: (id: string, data: any) => apiClient.patch(`/sectors/${id}`, data),
   deleteSector: (id: string) => apiClient.delete(`/sectors/${id}`),
 
+  // Skills
+  listSkills: () => apiClient.get('/skills'),
+  createSkill: (data: any) => apiClient.post('/skills', data),
+  updateSkill: (id: string, data: any) => apiClient.patch(`/skills/${id}`, data),
+  deleteSkill: (id: string) => apiClient.delete(`/skills/${id}`),
+
+  // Generic Masters
+  listMaster: (master: string) => apiClient.get(`/masters/${master}`),
+  createMaster: (master: string, data: any) => apiClient.post(`/masters/${master}`, data),
+  updateMaster: (master: string, id: string, data: any) => apiClient.patch(`/masters/${master}/${id}`, data),
+  deleteMaster: (master: string, id: string) => apiClient.delete(`/masters/${master}/${id}`),
+
   // Reports
   getSelectionFunnel: () => apiClient.get('/reports/analytics/funnel'),
 };
@@ -88,6 +100,10 @@ export const mapBackendSectorToFrontend = (data: any): Sector & { id: string } =
     name: data.name,
     companies: data._count?.companies || 0,
     openings: 0, // Mock
-    status: 'Active'
+    status: 'Active',
+    industryRelevance: data.industryRelevance || [],
+    industryDomains: data.industryDomains || [],
+    industrySubDomains: data.industrySubDomains || [],
+    applicationAreas: data.applicationAreas || []
   };
 };

@@ -6,6 +6,12 @@ export interface Program {
   degree: 'Undergraduate' | 'Postgraduate' | 'Diploma' | 'Doctoral'
   seats: number
   duration: string
+  skills?: string[]
+  sectors?: string[]
+  subSectors?: string[]
+  industry?: string[]
+  domain?: string[]
+  subDomain?: string[]
 }
 
 export const PROGRAMS_INITIAL: Program[] = [

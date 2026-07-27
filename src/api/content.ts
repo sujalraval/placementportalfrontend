@@ -9,6 +9,16 @@ export const contentApi = {
   createNews: (data: any) => apiClient.post('/content/news', data),
   updateNewsStatus: (id: string, status: string) => apiClient.patch(`/content/news/${id}/status`, { status }),
 
+  // Uploads
+  uploadContentFile: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post('/content/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data; // should return { url: '...' }
+  },
+
   // Events
   listEvents: () => apiClient.get('/content/events'),
   getEvent: (slug: string) => apiClient.get(`/content/events/${slug}`),
@@ -26,7 +36,8 @@ export const mapBackendNewsToFrontend = (data: any): NewsItem & { id: string } =
     date: new Date(data.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     cat: data.category || 'Announcement',
     title: data.title,
-    body: data.body || data.excerpt || ''
+    body: data.body || data.excerpt || '',
+    attachmentUrl: data.attachmentUrl || undefined
   };
 };
 
@@ -36,8 +47,9 @@ export const mapBackendEventToFrontend = (data: any): AdminEvent & { id: string 
     title: data.title,
     date: new Date(data.startsAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
     mode: data.venue?.toLowerCase().includes('webinar') ? 'Webinar' : 'On-campus',
-    dept: 'All departments', // Mock for now
-    status: new Date(data.startsAt) > new Date() ? 'Upcoming' : 'Completed'
+    dept: data.departments?.length ? data.departments.map((d: any) => d.name).join(', ') : 'All departments',
+    status: new Date(data.startsAt) > new Date() ? 'Upcoming' : 'Completed',
+    attachmentUrl: data.attachmentUrl || undefined
   };
 };
 

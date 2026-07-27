@@ -276,4 +276,14 @@ export const studentApi = {
     const response = await apiClient.delete(`/students/me/documents/${id}`);
     return response.data;
   },
+
+  // --- Admin/Staff Endpoints ---
+  listStudents: async () => {
+    const response = await apiClient.get('/students');
+    return response.data;
+  },
+  importStudents: async (data: any[]) => {
+    const response = await apiClient.post('/students/import', data);
+    return response.data;
+  }
 };
