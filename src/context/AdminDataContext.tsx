@@ -213,17 +213,24 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         coordinatorPhone: dept.coordPhone,
       }
       if (i >= 0 && depts[i]?.id) {
-        adminApi.updateDepartment(depts[i].id!, payload).then(() => {
-          setDepts((list) => list.map((d, idx) => (idx === i ? dept : d)))
-          showToast('Department updated')
-        }).catch(console.error)
+          adminApi.updateDepartment(depts[i].id!, payload).then(() => {
+            setDepts((list) => list.map((d, idx) => (idx === i ? dept : d)))
+            showToast('Department updated')
+          }).catch((err) => {
+            console.error(err);
+            const details = err.response?.data?.error?.details;
+            const msg = details && Array.isArray(details) ? details.map((d: any) => d.message).join(', ') : (err.response?.data?.error?.message || 'Failed to update department');
+            showToast(msg);
+          })
       } else {
         adminApi.createDepartment(payload).then(res => {
           setDepts((list) => [{ ...dept, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id }, ...list])
           showToast('Department added')
         }).catch((err) => {
           console.error(err);
-          showToast(err.response?.data?.error?.message || 'Failed to add department');
+          const details = err.response?.data?.error?.details;
+          const msg = details && Array.isArray(details) ? details.map((d: any) => d.message).join(', ') : (err.response?.data?.error?.message || 'Failed to add department');
+          showToast(msg);
         })
       }
     },

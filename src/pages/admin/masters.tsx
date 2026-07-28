@@ -46,10 +46,11 @@ function GenericMasterTable({ masterId, title }: { masterId: string, title: stri
   }, [masterId])
 
   const handleSave = (item: any) => {
-    openModal(`Edit ${title}`, 
+    const isEdit = !!item
+    openModal(`${isEdit ? 'Edit' : 'Add'} ${title}`, 
       <SimpleFormModal
         submitLabel="Save"
-        initial={item}
+        initial={item || undefined}
         fields={[{ id: 'name', label: 'Name', full: true }]}
         onSubmit={(v) => {
           if (!v.name) return showToast('Name is required')

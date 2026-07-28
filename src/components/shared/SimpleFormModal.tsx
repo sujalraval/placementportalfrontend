@@ -24,7 +24,8 @@ export function SimpleFormModal({ fields, initial = {}, onSubmit, submitLabel = 
   const { closeModal } = useModal()
   const [values, setValues] = useState<Record<string, any>>(() => {
     const v: Record<string, any> = {}
-    for (const f of fields) v[f.id] = initial[f.id] || (f.options && f.type !== 'multiselect' ? f.options[0] : (f.type === 'multiselect' ? [] : ''))
+    const init = initial || {}
+    for (const f of fields) v[f.id] = init[f.id] || (f.options && f.type !== 'multiselect' ? f.options[0] : (f.type === 'multiselect' ? [] : ''))
     return v
   })
 
