@@ -34,7 +34,7 @@ export function PersonalTab() {
           { id: 'linkedin', label: 'LinkedIn' }, { id: 'github', label: 'GitHub' }, 
           { id: 'address', label: 'Address', full: true },
         ]}
-        onSubmit={(v) => { updatePersonal(v); closeModal(); showToast('Personal details updated') }}
+        onSubmit={async (v) => { await updatePersonal(v); closeModal(); showToast('Personal details updated') }}
       />
     ))
   }

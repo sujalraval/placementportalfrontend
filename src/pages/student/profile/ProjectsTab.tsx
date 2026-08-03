@@ -25,10 +25,10 @@ export function ProjectsTab() {
           { id: 'desc', label: 'Description', type: 'textarea', rows: 3, full: true },
           { id: 'repo', label: 'Repo URL' }, { id: 'demo', label: 'Demo URL' },
         ]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.name) { showToast('Project name is required'); return }
           const proj = { name: v.name, stack: v.stack, desc: v.desc, repo: v.repo, demo: v.demo }
-          if (i !== null) editProject(i, proj); else addProject(proj)
+          if (i !== null) editProject(i, proj); else await addProject(proj)
           closeModal(); showToast(i !== null ? 'Project updated' : 'Project added')
         }}
       />
@@ -44,10 +44,10 @@ export function ProjectsTab() {
         fields={[
           { id: 'name', label: 'Certification', full: true }, { id: 'by', label: 'Issued by' }, { id: 'year', label: 'Year' },
         ]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.name) { showToast('Name is required'); return }
           const cert = { name: v.name, by: v.by, year: v.year }
-          if (i !== null) editCert(i, cert); else addCert(cert)
+          if (i !== null) editCert(i, cert); else await addCert(cert)
           closeModal(); showToast(i !== null ? 'Certification updated' : 'Certification added')
         }}
       />

@@ -17,8 +17,8 @@ export function ScheduleInterviewModal() {
         { id: 'panel', label: 'Panel', placeholder: 'Panel A · Interviewer' },
         { id: 'mode', label: 'Mode', type: 'select', options: ['Virtual', 'On-campus', 'Phone'] },
       ]}
-      onSubmit={(v) => {
-        saveInterview({
+      onSubmit={async (v) => {
+        await saveInterview({
           cand: v.cand, role: v.role, round: v.round, date: v.date || 'TBD', slot: v.slot || 'TBD',
           panel: v.panel || 'Panel A', mode: v.mode as 'Virtual' | 'On-campus' | 'Phone',
         })

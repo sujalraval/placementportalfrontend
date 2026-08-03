@@ -29,10 +29,10 @@ export function OverviewTab() {
           { id: 'url', label: 'URL', full: true },
           { id: 'ic', label: 'Icon', type: 'select', options: LINK_ICONS, full: true },
         ]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.label || !v.url) { showToast('Label and URL are required'); return }
           if (index !== null) editLink(index, { label: v.label, url: v.url, ic: v.ic })
-          else addLink({ label: v.label, url: v.url, ic: v.ic })
+          else await addLink({ label: v.label, url: v.url, ic: v.ic })
           closeModal()
           showToast(index !== null ? 'Link updated' : 'Link added')
         }}
@@ -49,7 +49,7 @@ export function OverviewTab() {
           { id: 'headline', label: 'Headline', full: true },
           { id: 'summary', label: 'Summary', type: 'textarea', rows: 5, full: true },
         ]}
-        onSubmit={(v) => { updateAbout(v.headline, v.summary); closeModal(); showToast('Summary updated') }}
+        onSubmit={async (v) => { await updateAbout(v.headline, v.summary); closeModal(); showToast('Summary updated') }}
       />
     ))
   }
@@ -68,8 +68,8 @@ export function OverviewTab() {
           { id: 'relocate', label: 'Relocation', type: 'select', options: ['Open to relocate', 'Not open to relocate'] },
           { id: 'avail', label: 'Availability', type: 'select', options: ['Available', 'Not Available'] },
         ]}
-        onSubmit={(v) => {
-          updatePreferences({ roles: v.roles, type: v.type, ctc: v.ctc, locations: v.locations, relocate: v.relocate, avail: v.avail })
+        onSubmit={async (v) => {
+          await updatePreferences({ roles: v.roles, type: v.type, ctc: v.ctc, locations: v.locations, relocate: v.relocate, avail: v.avail })
           closeModal(); showToast('Career preferences updated')
         }}
       />

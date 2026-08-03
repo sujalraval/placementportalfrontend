@@ -23,9 +23,9 @@ export function DocumentsTab() {
           { id: 'name', label: 'Document name', full: true },
           { id: 'type', label: 'Type', type: 'select', options: ['Academic', 'Certification', 'Identity', 'Other'] },
         ]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.name) { showToast('Name is required'); return }
-          addDocument({ name: v.name, type: v.type, status: 'Uploaded' })
+          await addDocument({ name: v.name, type: v.type, status: 'Uploaded' })
           closeModal(); showToast('Document uploaded — pending verification')
         }}
       />

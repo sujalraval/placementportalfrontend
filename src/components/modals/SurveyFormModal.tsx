@@ -18,7 +18,7 @@ export function SurveyFormModal() {
         { id: 'name', label: 'Survey name', full: true },
         { id: 'aud', label: 'Audience', type: 'select', options: AUDIENCES, full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.name) { showToast('Name is required'); return }
         createSurvey({ name: v.name, aud: v.aud })
         closeModal()

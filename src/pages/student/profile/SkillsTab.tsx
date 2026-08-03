@@ -23,10 +23,10 @@ export function SkillsTab() {
           { id: 'n', label: 'Skill', full: true },
           { id: 'lv', label: 'Proficiency', type: 'range', full: true },
         ]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.n) { showToast('Skill name is required'); return }
           const skill = { n: v.n, lv: +v.lv || 0 }
-          if (i !== null) editSkill(i, skill); else addSkill(skill)
+          if (i !== null) editSkill(i, skill); else await addSkill(skill)
           closeModal(); showToast(i !== null ? 'Skill updated' : 'Skill added')
         }}
       />

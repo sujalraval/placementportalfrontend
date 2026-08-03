@@ -14,7 +14,7 @@ export function CreditsModal({ index }: { index: number }) {
         { id: 'count', label: 'Academic credits', placeholder: '4' },
         { id: 'evalBasis', label: 'Evaluation basis', type: 'select', options: ['Report + Viva', 'Continuous assessment', 'Report only', 'Faculty mentor evaluation'] },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         finalizeInternApproval(index, { course: v.course, count: v.count, evalBasis: v.evalBasis })
         closeModal()
       }}

@@ -21,7 +21,7 @@ export function AcademicsTab() {
         submitLabel="Save"
         initial={{ cgpa: me.cgpa, backlogs: String(me.backlogs) }}
         fields={[{ id: 'cgpa', label: 'CGPA' }, { id: 'backlogs', label: 'Live backlogs', type: 'number' }]}
-        onSubmit={(v) => { updateAcademicMeta(v.cgpa, +v.backlogs || 0); closeModal(); showToast('Academic summary updated') }}
+        onSubmit={async (v) => { await updateAcademicMeta(v.cgpa, +v.backlogs || 0); closeModal(); showToast('Academic summary updated') }}
       />
     ))
   }
@@ -36,8 +36,8 @@ export function AcademicsTab() {
           { id: 'sgpa', label: 'SGPA' }, { id: 'cr', label: 'Credits', type: 'number' },
           { id: 'res', label: 'Result', type: 'select', options: ['Passed', 'In progress', 'Backlog'] },
         ]}
-        onSubmit={(v) => {
-          updateSemester(i, { sgpa: v.sgpa, cr: +v.cr || s.cr, res: v.res as typeof s.res })
+        onSubmit={async (v) => {
+          await updateSemester(i, { sgpa: v.sgpa, cr: +v.cr || s.cr, res: v.res as typeof s.res })
           closeModal(); showToast('Semester updated')
         }}
       />

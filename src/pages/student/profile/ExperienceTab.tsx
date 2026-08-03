@@ -25,10 +25,10 @@ export function ExperienceTab() {
           { id: 'desc', label: 'Description', type: 'textarea', rows: 3, full: true },
           { id: 'tech', label: 'Tech used', full: true },
         ]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.role || !v.co) { showToast('Role and company are required'); return }
           const exp = { role: v.role, co: v.co, dur: v.dur, loc: v.loc, desc: v.desc, tech: v.tech }
-          if (i !== null) editExperience(i, exp); else addExperience(exp)
+          if (i !== null) editExperience(i, exp); else await addExperience(exp)
           closeModal(); showToast(i !== null ? 'Experience updated' : 'Experience added')
         }}
       />
@@ -45,10 +45,10 @@ export function ExperienceTab() {
           { id: 't', label: 'Achievement', full: true }, { id: 'y', label: 'Year' },
           { id: 'd', label: 'Details (optional)', type: 'textarea', rows: 2, full: true },
         ]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.t) { showToast('Achievement is required'); return }
           const ach = { t: v.t, y: v.y, d: v.d }
-          if (i !== null) editAchievement(i, ach); else addAchievement(ach)
+          if (i !== null) editAchievement(i, ach); else await addAchievement(ach)
           closeModal(); showToast(i !== null ? 'Achievement updated' : 'Achievement added')
         }}
       />
@@ -65,10 +65,10 @@ export function ExperienceTab() {
           { id: 'role', label: 'Role', full: true }, { id: 'org', label: 'Organisation', full: true },
           { id: 'dur', label: 'Duration' }, { id: 'd', label: 'Details', type: 'textarea', rows: 2, full: true },
         ]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.role) { showToast('Role is required'); return }
           const pos = { role: v.role, org: v.org, dur: v.dur, d: v.d }
-          if (i !== null) editPosition(i, pos); else addPosition(pos)
+          if (i !== null) editPosition(i, pos); else await addPosition(pos)
           closeModal(); showToast(i !== null ? 'Position updated' : 'Position added')
         }}
       />

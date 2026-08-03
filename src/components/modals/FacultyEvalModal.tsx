@@ -16,8 +16,8 @@ export function FacultyEvalModal({ index }: { index: number }) {
         { id: 'marks', label: 'Marks (out of 100)', placeholder: '85' },
         { id: 'remarks', label: 'Remarks', type: 'textarea', rows: 3, full: true },
       ]}
-      onSubmit={(v) => {
-        saveFacultyEvaluation(index, { grade: v.grade, marks: +v.marks || 0, remarks: v.remarks })
+      onSubmit={async (v) => {
+        await saveFacultyEvaluation(index, { grade: v.grade, marks: +v.marks || 0, remarks: v.remarks })
         closeModal()
       }}
     />

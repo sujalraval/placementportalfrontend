@@ -16,7 +16,7 @@ export function InternReportModal({ index }: { index: number }) {
         { id: 'summary', label: 'Summary of work done', type: 'textarea', rows: 3, full: true },
         { id: 'learnings', label: 'Key learnings', type: 'textarea', rows: 2, full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.summary) { showToast('Please summarise the work done'); return }
         submitInternshipReport(index, { objectives: v.objectives, summary: v.summary, learnings: v.learnings })
         closeModal()

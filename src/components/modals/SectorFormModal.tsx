@@ -32,11 +32,11 @@ export function SectorFormModal({ index, item }: { index: number; item?: Sector 
         { id: 'openings', label: 'Open positions', type: 'number' },
         { id: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive'] },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.name) { showToast('Name is required'); return }
         const splitTags = (str?: string) => str ? str.split(',').map(s => s.trim()).filter(Boolean) : undefined;
         
-        saveSector(index, { 
+        await saveSector(index, { 
           name: v.name, 
           companies: +v.companies || 0, 
           openings: +v.openings || 0, 

@@ -18,10 +18,10 @@ export function SkillFormModal({ index, item }: { index: number; item?: Skill })
         { id: 'description', label: 'Competency Description*', type: 'textarea', full: true },
         { id: 'category', label: 'Category (Optional)', full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.name) { showToast('Competency Name is required'); return }
         if (!v.description) { showToast('Competency Description is required'); return }
-        saveSkill(index, { name: v.name, description: v.description, category: v.category })
+        await saveSkill(index, { name: v.name, description: v.description, category: v.category })
         closeModal()
       }}
     />

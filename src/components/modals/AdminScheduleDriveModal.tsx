@@ -25,7 +25,7 @@ export function AdminScheduleDriveModal() {
         { id: 'depts', label: 'Departments', type: 'select', options: ['All departments', ...DEPTS.map(d => d.name)], full: true },
         { id: 'rounds', label: 'Rounds', placeholder: 'Aptitude · Technical · HR', full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.companyName) { showToast('Please select a company'); return; }
         if (!v.title) { showToast('Drive title is required'); return }
         if (!v.date) { showToast('Date is required'); return }
@@ -33,7 +33,7 @@ export function AdminScheduleDriveModal() {
         const selectedCompany = validCompanies.find(c => c.name === v.companyName);
         if (!selectedCompany?.id) { showToast('Invalid company selected'); return; }
 
-        addDrive({ 
+        await addDrive({ 
           companyId: selectedCompany.id,
           title: v.title, 
           date: v.date, 

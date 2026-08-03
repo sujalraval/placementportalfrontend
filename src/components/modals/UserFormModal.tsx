@@ -28,14 +28,14 @@ export function UserFormModal({ index, item }: { index: number; item?: AdminUser
       submitLabel="Save"
       initial={item ? { name: item.name, role: item.role, status: item.status, dept: item.dept, email: item.email } : { role: 'Coordinator', status: 'Active', dept: '—' }}
       fields={fields}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.name) { showToast('Name is required'); return }
         if (!v.email) { showToast('Email is required'); return }
         if (index < 0 && !v.password) { showToast('Password required'); return }
         if (v.password && v.password.length < 8) { showToast('Password must be at least 8 characters'); return }
         if (['Coordinator', 'Faculty'].includes(v.role) && (!v.dept || v.dept === '—')) { showToast('Department is required for this role'); return }
         if (v.role === 'Admin' && v.dept && v.dept !== '—') { showToast('Admins cannot have a department'); return }
-        saveUser(index, { name: v.name, role: v.role as AdminUser['role'], status: v.status as AdminUser['status'], dept: v.dept === '—' ? '' : v.dept, email: v.email }, v.password)
+        await saveUser(index, { name: v.name, role: v.role as AdminUser['role'], status: v.status as AdminUser['status'], dept: v.dept === '—' ? '' : v.dept, email: v.email }, v.password)
         closeModal()
       }}
     />

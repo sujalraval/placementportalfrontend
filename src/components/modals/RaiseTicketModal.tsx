@@ -19,7 +19,7 @@ export function RaiseTicketModal() {
         { id: 'sub', label: 'Subject', full: true },
         { id: 'body', label: 'Describe the issue', type: 'textarea', rows: 4, full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.sub) { showToast('Subject is required'); return }
         raiseTicket({ cat: v.cat, sub: v.sub, pri: v.pri as 'Low' | 'Medium' | 'High', body: v.body })
         closeModal()

@@ -36,10 +36,10 @@ export function DeptFormModal({ index, item }: { index: number; item?: Departmen
         { id: 'total', label: 'Students', type: 'number' },
         { id: 'placed', label: 'Placed', type: 'number' },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.name) { showToast('Name is required'); return }
         if (!v.code) { showToast('Code is required'); return }
-        saveDept(index, { 
+        await saveDept(index, { 
           name: v.name, 
           code: v.code.toUpperCase(), 
           coord: v.coord, 

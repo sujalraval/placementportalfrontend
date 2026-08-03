@@ -15,8 +15,8 @@ export function OutcomeUpdateModal({ index, item }: { index: number; item: Emplo
         { id: 'status', label: 'Current status', type: 'select', options: ['Active', 'Promoted', 'Left', 'Higher Studies'], full: true },
         { id: 'note', label: 'Update note', placeholder: 'e.g. Promoted to Team Lead, Mar 2026', full: true },
       ]}
-      onSubmit={(v) => {
-        updateOutcome(index, v.status as EmploymentOutcome['status'], v.note)
+      onSubmit={async (v) => {
+        await updateOutcome(index, v.status as EmploymentOutcome['status'], v.note)
         closeModal()
       }}
     />

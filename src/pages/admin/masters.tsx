@@ -52,7 +52,7 @@ function GenericMasterTable({ masterId, title }: { masterId: string, title: stri
         submitLabel="Save"
         initial={item || undefined}
         fields={[{ id: 'name', label: 'Name', full: true }]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.name) return showToast('Name is required')
           const req = item?.id ? adminApi.updateMaster(masterId, item.id, v) : adminApi.createMaster(masterId, v)
           req.then(() => {

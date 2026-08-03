@@ -24,7 +24,7 @@ export default function RecruiterCompanyPage() {
           { id: 'address', label: 'Registered address', full: true },
           { id: 'about', label: 'About', type: 'textarea', rows: 3, full: true },
         ]}
-        onSubmit={(v) => { saveCompany(v as { sector: string; website: string; address: string; about: string }); closeModal() }}
+        onSubmit={async (v) => { await saveCompany(v as { sector: string; website: string; address: string; about: string }); closeModal() }}
       />
     ))
   }
@@ -35,7 +35,7 @@ export default function RecruiterCompanyPage() {
         submitLabel="Save"
         initial={{ name: rec.hrHead.name, desig: rec.hrHead.desig, email: rec.hrHead.email, phone: rec.hrHead.phone }}
         fields={[{ id: 'name', label: 'Name' }, { id: 'desig', label: 'Designation' }, { id: 'email', label: 'Email' }, { id: 'phone', label: 'Phone' }]}
-        onSubmit={(v) => { saveHR(v as { name: string; desig: string; email: string; phone: string }); closeModal() }}
+        onSubmit={async (v) => { await saveHR(v as { name: string; desig: string; email: string; phone: string }); closeModal() }}
       />
     ))
   }
@@ -47,10 +47,10 @@ export default function RecruiterCompanyPage() {
         submitLabel="Save"
         initial={c ? { name: c.name, desig: c.desig, email: c.email, phone: c.phone } : {}}
         fields={[{ id: 'name', label: 'Name' }, { id: 'desig', label: 'Designation' }, { id: 'email', label: 'Email' }, { id: 'phone', label: 'Phone' }]}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!v.name) return
           const contact = { name: v.name, desig: v.desig, email: v.email, phone: v.phone }
-          if (i !== null) saveContact(i, contact); else addContact(contact)
+          if (i !== null) await saveContact(i, contact); else await addContact(contact)
           closeModal()
         }}
       />

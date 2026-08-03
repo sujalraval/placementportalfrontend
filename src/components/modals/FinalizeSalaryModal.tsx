@@ -14,8 +14,8 @@ export function FinalizeSalaryModal({ index }: { index: number }) {
         { id: 'fixed', label: 'Fixed component', placeholder: '₹6.2 L' }, { id: 'variable', label: 'Variable / bonus', placeholder: '₹0.8 L' },
         { id: 'joining', label: 'Joining month', placeholder: 'Jul 2026' }, { id: 'loc', label: 'Location', placeholder: 'Ahmedabad' },
       ]}
-      onSubmit={(v) => {
-        saveSalary(index, { ctc: v.ctc || '₹—', fixed: v.fixed, variable: v.variable }, v.joining, v.loc)
+      onSubmit={async (v) => {
+        await saveSalary(index, { ctc: v.ctc || '₹—', fixed: v.fixed, variable: v.variable }, v.joining, v.loc)
         closeModal()
       }}
     />

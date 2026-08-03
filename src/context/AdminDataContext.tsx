@@ -27,39 +27,39 @@ interface AdminDataValue {
   openings: Opening[]
   employmentOutcomes: EmploymentOutcome[]
 
-  saveNews(i: number, item: NewsItem): void
-  deleteNews(i: number): void
+  saveNews(i: number, item: NewsItem): Promise<void>
+  deleteNews(i: number): Promise<void>
 
-  saveEvent(i: number, item: AdminEvent): void
-  deleteEvent(i: number): void
+  saveEvent(i: number, item: AdminEvent): Promise<void>
+  deleteEvent(i: number): Promise<void>
 
-  saveBroadcast(i: number, item: AdminBroadcast): void
-  deleteBroadcast(i: number): void
+  saveBroadcast(i: number, item: AdminBroadcast): Promise<void>
+  deleteBroadcast(i: number): Promise<void>
 
-  saveDept(i: number, dept: Department): void
-  deleteDept(i: number): void
+  saveDept(i: number, dept: Department): Promise<void>
+  deleteDept(i: number): Promise<void>
 
-  saveProgram(i: number, program: Program): void
-  deleteProgram(i: number): void
+  saveProgram(i: number, program: Program): Promise<void>
+  deleteProgram(i: number): Promise<void>
 
-  saveUser(i: number, user: AdminUser, password?: string): void
-  approveUser(i: number): void
-  deleteUser(i: number): void
+  saveUser(i: number, user: AdminUser, password?: string): Promise<void>
+  approveUser(i: number): Promise<void>
+  deleteUser(i: number): Promise<void>
 
-  saveSector(i: number, sector: Sector): void
-  deleteSector(i: number): void
+  saveSector(i: number, sector: Sector): Promise<void>
+  deleteSector(i: number): Promise<void>
 
-  saveSkill(i: number, skill: Skill): void
-  deleteSkill(i: number): void
+  saveSkill(i: number, skill: Skill): Promise<void>
+  deleteSkill(i: number): Promise<void>
 
-  saveOpening(i: number, opening: Omit<Opening, 'apps' | 'status'>, status: Opening['status']): void
-  approveOpening(i: number): void
-  publishOpening(i: number): void
-  closeOpening(i: number): void
-  deleteOpening(i: number): void
-  generateOpenings(): void
+  saveOpening(i: number, opening: Omit<Opening, 'apps' | 'status'>, status: Opening['status']): Promise<void>
+  approveOpening(i: number): Promise<void>
+  publishOpening(i: number): Promise<void>
+  closeOpening(i: number): Promise<void>
+  deleteOpening(i: number): Promise<void>
+  generateOpenings(): Promise<void>
 
-  updateOutcome(i: number, status: EmploymentOutcome['status'], note: string): void
+  updateOutcome(i: number, status: EmploymentOutcome['status'], note: string): Promise<void>
 }
 
 const AdminDataContext = createContext<AdminDataValue | null>(null)
@@ -86,48 +86,48 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
 
     adminApi.listDepartments().then(res => {
       setDepts((res?.data?.data || res?.data || []).map(mapBackendDepartmentToFrontend));
-    }).catch(console.error);
+    }).catch(err => { console.error(err); throw err; });
 
     adminApi.listPrograms().then(res => {
       setPrograms((res?.data?.data || res?.data || []).map(mapBackendProgramToFrontend));
-    }).catch(console.error);
+    }).catch(err => { console.error(err); throw err; });
 
     adminApi.listSectors().then(res => {
       setSectors((res?.data?.data || res?.data || []).map(mapBackendSectorToFrontend));
-    }).catch(console.error);
+    }).catch(err => { console.error(err); throw err; });
 
     adminApi.listSkills().then(res => {
       setSkills(res?.data?.data || res?.data || []);
-    }).catch(console.error);
+    }).catch(err => { console.error(err); throw err; });
 
     adminApi.listUsers().then(res => {
       const payload = res?.data?.data || res?.data;
       const userArray = Array.isArray(payload) ? payload : (payload?.users || []);
       setUsers(userArray.map(mapBackendUserToAdminUser));
-    }).catch(console.error);
+    }).catch(err => { console.error(err); throw err; });
 
     postingApi.list().then(res => {
       // Admins see all postings including pending
       setOpenings((res?.data?.data || res?.data || []).map(mapBackendPostingToOpening));
-    }).catch(console.error);
+    }).catch(err => { console.error(err); throw err; });
 
     contentApi.listNews().then(res => {
       setNews((res?.data?.data || res?.data || []).map(mapBackendNewsToFrontend));
-    }).catch(console.error);
+    }).catch(err => { console.error(err); throw err; });
 
     contentApi.listEvents().then(res => {
       setEvents((res?.data?.data || res?.data || []).map(mapBackendEventToFrontend));
-    }).catch(console.error);
+    }).catch(err => { console.error(err); throw err; });
 
     contentApi.listBroadcasts().then(res => {
       setAdminNotifs((res?.data?.data || res?.data || []).map(mapBackendBroadcastToFrontend));
-    }).catch(console.error);
+    }).catch(err => { console.error(err); throw err; });
   }, [user]);
 
   const value: AdminDataValue = {
     news, events, adminNotifs, depts, programs, users, sectors, skills, openings, employmentOutcomes,
 
-    saveNews(i, item) {
+    async saveNews(i, item) {
       const payload = {
         title: item.title,
         slug: item.title.toLowerCase().replace(/\s+/g, '-'),
@@ -139,25 +139,25 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         setNews((list) => list.map((n, idx) => (idx === i ? item : n)))
         showToast('News updated')
       } else {
-        contentApi.createNews(payload).then(res => {
+        await contentApi.createNews(payload).then(res => {
           setNews((list) => [{ ...item, id: (res.data as any)?.id || (res as any).id }, ...list])
           showToast('News published')
-        }).catch(console.error);
+        }).catch(err => { console.error(err); throw err; });
       }
     },
-    deleteNews(i) {
+    async deleteNews(i) {
       if (news[i]?.id) {
-        contentApi.updateNewsStatus(news[i].id!, 'ARCHIVED').then(() => {
+        await contentApi.updateNewsStatus(news[i].id!, 'ARCHIVED').then(() => {
           setNews((list) => list.filter((_, idx) => idx !== i))
           showToast('News archived')
-        }).catch(console.error);
+        }).catch(err => { console.error(err); throw err; });
       } else {
         setNews((list) => list.filter((_, idx) => idx !== i))
         showToast('News removed')
       }
     },
 
-    saveEvent(i, event) {
+    async saveEvent(i, event) {
       const payload = {
         title: event.title,
         slug: event.title.toLowerCase().replace(/\s+/g, '-'),
@@ -168,26 +168,26 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         setEvents((list) => list.map((e, idx) => (idx === i ? event : e)))
         showToast('Event updated')
       } else {
-        contentApi.createEvent(payload).then(res => {
+        await contentApi.createEvent(payload).then(res => {
           setEvents((list) => [{ ...event, id: (res.data as any)?.id || (res as any).id }, ...list])
           showToast('Event created')
-        }).catch(console.error);
+        }).catch(err => { console.error(err); throw err; });
       }
     },
-    deleteEvent(i) {
+    async deleteEvent(i) {
       if (events[i]?.id) {
-        contentApi.updateEventStatus(events[i].id!, 'ARCHIVED').then(() => {
+        await contentApi.updateEventStatus(events[i].id!, 'ARCHIVED').then(() => {
           setEvents((list) => list.filter((_, idx) => idx !== i))
           showToast('Event archived')
-        }).catch(console.error);
+        }).catch(err => { console.error(err); throw err; });
       } else {
         setEvents((list) => list.filter((_, idx) => idx !== i))
         showToast('Event removed')
       }
     },
 
-    saveBroadcast(i, item) {
-      contentApi.sendBroadcast({
+    async saveBroadcast(i, item) {
+      await contentApi.sendBroadcast({
         title: item.title,
         body: item.title, // using title as body since broadcast form doesn't strictly have a big body
         audience: item.audience === 'All departments' ? 'ALL' : 'STUDENTS'
@@ -195,14 +195,14 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         setAdminNotifs((list) => [{ ...item, id: (res.data as any)?.id || (res as any).id }, ...list])
         if (i < 0) pushNotification({ ic: 'info', type: 'Announcement', title: item.title })
         showToast('Broadcast sent successfully')
-      }).catch(console.error);
+      }).catch(err => { console.error(err); throw err; });
     },
-    deleteBroadcast(i) {
+    async deleteBroadcast(i) {
       setAdminNotifs((list) => list.filter((_, idx) => idx !== i))
       showToast('Broadcast removed')
     },
 
-    saveDept(i, dept) {
+    async saveDept(i, dept) {
       const payload = {
         name: dept.name,
         code: dept.code,
@@ -213,7 +213,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         coordinatorPhone: dept.coordPhone,
       }
       if (i >= 0 && depts[i]?.id) {
-          adminApi.updateDepartment(depts[i].id!, payload).then(() => {
+          await adminApi.updateDepartment(depts[i].id!, payload).then(() => {
             setDepts((list) => list.map((d, idx) => (idx === i ? dept : d)))
             showToast('Department updated')
           }).catch((err) => {
@@ -221,9 +221,10 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
             const details = err.response?.data?.error?.details;
             const msg = details && Array.isArray(details) ? details.map((d: any) => d.message).join(', ') : (err.response?.data?.error?.message || 'Failed to update department');
             showToast(msg);
-          })
+          throw err;
+        })
       } else {
-        adminApi.createDepartment(payload).then(res => {
+        await adminApi.createDepartment(payload).then(res => {
           setDepts((list) => [{ ...dept, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id }, ...list])
           showToast('Department added')
         }).catch((err) => {
@@ -231,19 +232,20 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
           const details = err.response?.data?.error?.details;
           const msg = details && Array.isArray(details) ? details.map((d: any) => d.message).join(', ') : (err.response?.data?.error?.message || 'Failed to add department');
           showToast(msg);
+          throw err;
         })
       }
     },
-    deleteDept(i) {
+    async deleteDept(i) {
       if (depts[i]?.id) {
-        adminApi.deleteDepartment(depts[i].id!).then(() => {
+        await adminApi.deleteDepartment(depts[i].id!).then(() => {
           setDepts((list) => list.filter((_, idx) => idx !== i))
           showToast('Department removed')
-        }).catch(console.error)
+        }).catch(err => { console.error(err); throw err; })
       }
     },
 
-    saveProgram(i, program) {
+    async saveProgram(i, program) {
       const payload = {
         departmentId: depts.find(d => d.name === program.dept)?.id,
         name: program.name, 
@@ -259,12 +261,12 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         subDomain: program.subDomain
       }
       if (i >= 0 && programs[i]?.id) {
-        adminApi.updateProgram(programs[i].id!, payload).then(() => {
+        await adminApi.updateProgram(programs[i].id!, payload).then(() => {
           setPrograms((list) => list.map((p, idx) => (idx === i ? program : p)))
           showToast('Program updated')
-        }).catch(console.error)
+        }).catch(err => { console.error(err); throw err; })
       } else {
-        adminApi.createProgram(payload).then(res => {
+        await adminApi.createProgram(payload).then(res => {
           setPrograms((list) => [{ ...program, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id }, ...list])
           showToast('Program added')
         }).catch((err) => {
@@ -273,16 +275,16 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         })
       }
     },
-    deleteProgram(i) {
+    async deleteProgram(i) {
       if (programs[i]?.id) {
-        adminApi.deleteProgram(programs[i].id!).then(() => {
+        await adminApi.deleteProgram(programs[i].id!).then(() => {
           setPrograms((list) => list.filter((_, idx) => idx !== i))
           showToast('Program removed')
-        }).catch(console.error)
+        }).catch(err => { console.error(err); throw err; })
       }
     },
 
-    saveUser(i, user, password) {
+    async saveUser(i, user, password) {
       if (i >= 0 && users[i]?.id) {
         let backendRole = undefined;
         if (user.role === 'Admin') backendRole = 'ADMIN';
@@ -291,7 +293,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         
         const deptObj = depts.find(d => d.name === user.dept);
         
-        adminApi.updateUser(users[i].id!, { 
+        await adminApi.updateUser(users[i].id!, { 
           fullName: user.name, 
           email: user.email,
           role: backendRole,
@@ -302,6 +304,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         }).catch((err) => {
           console.error(err);
           showToast(err.response?.data?.error?.message || 'Failed to update user');
+          throw err;
         })
       } else {
         let backendRole = 'COORDINATOR';
@@ -310,7 +313,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         
         const deptObj = depts.find(d => d.name === user.dept);
         
-        adminApi.createUser({
+        await adminApi.createUser({
           fullName: user.name,
           email: user.email,
           password: password || 'defaultPass123',
@@ -328,29 +331,30 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
             msg = typeof errorData.details === 'string' ? errorData.details : JSON.stringify(errorData.details);
           }
           showToast(msg);
+          throw err;
         })
       }
     },
-    approveUser(i) {
+    async approveUser(i) {
       const user = users[i];
       if (user?.id) {
-        adminApi.updateUserStatus(user.id, 'ACTIVE').then(() => {
+        await adminApi.updateUserStatus(user.id, 'ACTIVE').then(() => {
           setUsers((list) => list.map((u, idx) => (idx === i ? { ...u, status: 'Active' } : u)))
           showToast(`${user.name} approved`)
-        }).catch(console.error);
+        }).catch(err => { console.error(err); throw err; });
       }
     },
-    deleteUser(i) {
+    async deleteUser(i) {
       const user = users[i];
       if (user?.id) {
-        adminApi.deleteUser(user.id).then(() => {
+        await adminApi.deleteUser(user.id).then(() => {
           setUsers((list) => list.filter((_, idx) => idx !== i))
           showToast('User removed')
-        }).catch(console.error);
+        }).catch(err => { console.error(err); throw err; });
       }
     },
 
-    saveSector(i, sector) {
+    async saveSector(i, sector) {
       const payload = {
         name: sector.name,
         industryRelevance: sector.industryRelevance,
@@ -359,49 +363,49 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         applicationAreas: sector.applicationAreas
       }
       if (i >= 0 && sectors[i]?.id) {
-        adminApi.updateSector(sectors[i].id!, payload).then(() => {
+        await adminApi.updateSector(sectors[i].id!, payload).then(() => {
           setSectors((list) => list.map((s, idx) => (idx === i ? sector : s)))
           showToast('Sector updated')
-        }).catch(console.error)
+        }).catch(err => { console.error(err); throw err; })
       } else {
-        adminApi.createSector(payload).then(res => {
+        await adminApi.createSector(payload).then(res => {
           setSectors((list) => [{ ...sector, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id }, ...list])
           showToast('Sector added')
-        }).catch(console.error)
+        }).catch(err => { console.error(err); throw err; })
       }
     },
-    deleteSector(i) {
+    async deleteSector(i) {
       if (sectors[i]?.id) {
-        adminApi.deleteSector(sectors[i].id!).then(() => {
+        await adminApi.deleteSector(sectors[i].id!).then(() => {
           setSectors((list) => list.filter((_, idx) => idx !== i))
           showToast('Sector removed')
-        }).catch(console.error)
+        }).catch(err => { console.error(err); throw err; })
       }
     },
 
-    saveSkill(i, skill) {
+    async saveSkill(i, skill) {
       if (i >= 0 && skills[i]?.id) {
-        adminApi.updateSkill(skills[i].id!, { name: skill.name, description: skill.description, category: skill.category }).then(() => {
+        await adminApi.updateSkill(skills[i].id!, { name: skill.name, description: skill.description, category: skill.category }).then(() => {
           setSkills((list) => list.map((s, idx) => (idx === i ? skill : s)))
           showToast('Skill updated')
-        }).catch(console.error)
+        }).catch(err => { console.error(err); throw err; })
       } else {
-        adminApi.createSkill({ name: skill.name, description: skill.description || '', category: skill.category }).then(res => {
+        await adminApi.createSkill({ name: skill.name, description: skill.description || '', category: skill.category }).then(res => {
           setSkills((list) => [{ ...skill, id: (res.data as any)?.data?.id || (res.data as any)?.id || (res as any).id }, ...list])
           showToast('Skill added')
-        }).catch(console.error)
+        }).catch(err => { console.error(err); throw err; })
       }
     },
-    deleteSkill(i) {
+    async deleteSkill(i) {
       if (skills[i]?.id) {
-        adminApi.deleteSkill(skills[i].id!).then(() => {
+        await adminApi.deleteSkill(skills[i].id!).then(() => {
           setSkills((list) => list.filter((_, idx) => idx !== i))
           showToast('Skill removed')
-        }).catch(console.error)
+        }).catch(err => { console.error(err); throw err; })
       }
     },
 
-    saveOpening(i, opening, status) {
+    async saveOpening(i, opening, status) {
       setOpenings((list) => {
         const o: Opening = { ...opening, status, apps: i >= 0 ? list[i].apps : 0 }
         if (i >= 0) return list.map((x, idx) => (idx === i ? o : x))
@@ -409,44 +413,44 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       })
       showToast(status === 'Published' ? 'Opening published — eligible students notified' : 'Saved as draft')
     },
-    approveOpening(i) {
+    async approveOpening(i) {
       const opening = openings[i];
       if (opening?.id) {
-        postingApi.updateStatus(opening.id, { status: 'PUBLISHED' }).then(() => {
+        await postingApi.updateStatus(opening.id, { status: 'PUBLISHED' }).then(() => {
           setOpenings((list) => list.map((o, idx) => (idx === i ? { ...o, status: 'Published' } : o)))
           showToast(`${opening.role} approved & published`)
-        }).catch(console.error);
+        }).catch(err => { console.error(err); throw err; });
       }
     },
-    publishOpening(i) {
+    async publishOpening(i) {
       const opening = openings[i];
       if (opening?.id) {
-        postingApi.updateStatus(opening.id, { status: 'PUBLISHED' }).then(() => {
+        await postingApi.updateStatus(opening.id, { status: 'PUBLISHED' }).then(() => {
           setOpenings((list) => list.map((o, idx) => (idx === i ? { ...o, status: 'Published' } : o)))
           showToast('Opening published')
-        }).catch(console.error);
+        }).catch(err => { console.error(err); throw err; });
       }
     },
-    closeOpening(i) {
+    async closeOpening(i) {
       const opening = openings[i];
       if (opening?.id) {
-        postingApi.updateStatus(opening.id, { status: 'CLOSED' }).then(() => {
+        await postingApi.updateStatus(opening.id, { status: 'CLOSED' }).then(() => {
           setOpenings((list) => list.map((o, idx) => (idx === i ? { ...o, status: 'Closed' } : o)))
           showToast('Opening closed')
-        }).catch(console.error);
+        }).catch(err => { console.error(err); throw err; });
       }
     },
-    deleteOpening(i) {
+    async deleteOpening(i) {
       // assuming delete endpoint doesn't exist on postingApi yet, just mock delete for now
       setOpenings((list) => list.filter((_, idx) => idx !== i))
       showToast('Opening deleted')
     },
-    generateOpenings() {
+    async generateOpenings() {
       setOpenings((list) => [{ role: 'Frontend Engineer', co: 'Cognizant', dept: 'CS · IT', ctc: '₹6.5 LPA', openings: 12, status: 'Pending', apps: 0 }, ...list])
       showToast('Generated 1 opening from recruiter requests — pending approval')
     },
 
-    updateOutcome(i, status, note) {
+    async updateOutcome(i, status, note) {
       setEmploymentOutcomes((list) => list.map((e, idx) => (idx === i ? { ...e, status, lastUpdate: `${note || 'Status updated'} · 08 Jul 2026` } : e)))
       showToast(`Outcome updated for ${employmentOutcomes[i]?.name}`)
     },

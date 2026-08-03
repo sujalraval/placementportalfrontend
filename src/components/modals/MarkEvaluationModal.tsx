@@ -16,8 +16,8 @@ export function MarkEvaluationModal({ index }: { index: number }) {
         { id: 'result', label: 'Result', type: 'select', options: ['Pass — advance', 'Hold', 'Fail — reject'] },
         { id: 'rem', label: 'Evaluator remarks', type: 'textarea', rows: 3, full: true },
       ]}
-      onSubmit={(v) => {
-        saveMarks(index, v.round, +v.score || 0, v.result)
+      onSubmit={async (v) => {
+        await saveMarks(index, v.round, +v.score || 0, v.result)
         closeModal()
       }}
     />

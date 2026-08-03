@@ -42,13 +42,13 @@ export function ProgramFormModal({ index, item }: { index: number; item?: Progra
         { id: 'domain', label: 'Domain (comma-separated)', full: true },
         { id: 'subDomain', label: 'Sub-Domain (comma-separated)', full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.name) { showToast('Name is required'); return }
         if (!v.code) { showToast('Code is required'); return }
         
         const splitTags = (str?: string) => str ? str.split(',').map(s => s.trim()).filter(Boolean) : undefined;
         
-        saveProgram(index, { 
+        await saveProgram(index, { 
           name: v.name, 
           code: v.code.toUpperCase(), 
           dept: v.dept, 

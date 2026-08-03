@@ -13,7 +13,7 @@ export function RecordResultModal({ index }: { index: number }) {
         { id: 'res', label: 'Outcome', type: 'select', options: ['Selected', 'On hold', 'Rejected'], full: true },
         { id: 'fb', label: 'Interviewer feedback', type: 'textarea', rows: 3, full: true },
       ]}
-      onSubmit={() => { saveResult(index); closeModal() }}
+      onSubmit={async () => { await saveResult(index); closeModal() }}
     />
   )
 }

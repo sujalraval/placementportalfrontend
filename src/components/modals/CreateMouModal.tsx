@@ -22,8 +22,8 @@ export function CreateMouModal() {
         { id: 'signatory', label: 'Company signatory' },
         { id: 'terms', label: 'Terms', type: 'textarea', rows: 4, full: true },
       ]}
-      onSubmit={(v) => {
-        saveMOU({ commit: v.commit, valid: v.valid, signatory: v.signatory, terms: v.terms })
+      onSubmit={async (v) => {
+        await saveMOU({ commit: v.commit, valid: v.valid, signatory: v.signatory, terms: v.terms })
         closeModal()
         openDoc(`Memorandum of Understanding · ${rec.company}`, 'Gujarat University · Training & Placement Cell', <MouDocument mou={{ ...d, ...v }} />, `${rec.company}_MOU`)
         showToast('MOU generated — signed copy saved')

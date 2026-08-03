@@ -19,9 +19,9 @@ export function ScheduleDriveModal() {
         { id: 'depts', label: 'Departments', full: true },
         { id: 'rounds', label: 'Rounds', placeholder: 'Aptitude · Technical · HR', full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.title) { showToast('Drive title is required'); return }
-        saveDrive({ title: v.title, date: v.date || 'TBD', depts: v.depts, rounds: v.rounds, mode: v.mode as 'On-campus' | 'Off-campus' | 'Virtual' })
+        await saveDrive({ title: v.title, date: v.date || 'TBD', depts: v.depts, rounds: v.rounds, mode: v.mode as 'On-campus' | 'Off-campus' | 'Virtual' })
         closeModal()
       }}
     />

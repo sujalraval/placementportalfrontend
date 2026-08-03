@@ -20,9 +20,9 @@ export function BroadcastFormModal({ index, item }: { index: number; item?: Admi
         { id: 'audience', label: 'Audience', type: 'select', options: AUDIENCES },
         { id: 'channel', label: 'Channels', full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.title) { showToast('Message is required'); return }
-        saveBroadcast(index, { title: v.title, audience: v.audience, channel: v.channel, date: index >= 0 ? item!.date : '08 Jul' })
+        await saveBroadcast(index, { title: v.title, audience: v.audience, channel: v.channel, date: index >= 0 ? item!.date : '08 Jul' })
         closeModal()
       }}
     />

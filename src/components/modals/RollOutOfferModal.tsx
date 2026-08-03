@@ -27,9 +27,9 @@ export function RollOutOfferModal({ index, offer }: RollOutOfferModalProps) {
         { id: 'joining', label: 'Joining', placeholder: 'Jul 2026' },
         { id: 'loc', label: 'Location', placeholder: 'Ahmedabad', full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.cand) { showToast('Candidate is required'); return }
-        saveOffer(index, { cand: v.cand, role: v.role, ctc: v.ctc, joining: v.joining, loc: v.loc })
+        await saveOffer(index, { cand: v.cand, role: v.role, ctc: v.ctc, joining: v.joining, loc: v.loc })
         closeModal()
       }}
     />

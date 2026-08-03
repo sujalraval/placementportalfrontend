@@ -25,7 +25,7 @@ export function InternPostModal() {
         { id: 'cgpa', label: 'Minimum CGPA' }, { id: 'deadline', label: 'Application deadline', placeholder: '20 Jul' },
         { id: 'desc', label: 'Description', type: 'textarea', rows: 3, full: true },
       ]}
-      onSubmit={(v) => {
+      onSubmit={async (v) => {
         if (!v.role) { showToast('Role is required'); return }
         postInternship({
           role: v.role, co: rec.company, type: v.type as 'Paid' | 'Free',

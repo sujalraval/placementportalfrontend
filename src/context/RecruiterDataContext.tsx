@@ -20,31 +20,31 @@ interface RecruiterDataValue {
   offers: Offer[]
   recDrives: RecDrive[]
 
-  saveCompany(fields: { sector: string; website: string; address: string; about: string }): void
-  saveHR(fields: { name: string; desig: string; email: string; phone: string }): void
-  saveContact(i: number, contact: Omit<RecContact, 'primary'>): void
-  addContact(contact: Omit<RecContact, 'primary'>): void
-  deleteContact(i: number): void
-  saveMOU(fields: { commit: string; valid: string; signatory: string; terms: string }): void
+  saveCompany(fields: { sector: string; website: string; address: string; about: string }): Promise<void>
+  saveHR(fields: { name: string; desig: string; email: string; phone: string }): Promise<void>
+  saveContact(i: number, contact: Omit<RecContact, 'primary'>): Promise<void>
+  addContact(contact: Omit<RecContact, 'primary'>): Promise<void>
+  deleteContact(i: number): Promise<void>
+  saveMOU(fields: { commit: string; valid: string; signatory: string; terms: string }): Promise<void>
 
-  saveJob(i: number, job: Omit<RecJob, 'co' | 'apps' | 'applicants'>): void
-  publishJob(i: number): void
-  closeJob(i: number): void
-  deleteJob(i: number): void
-  setAppStage(jobIndex: number, en: string, stage: RecJobApplicant['stage']): void
+  saveJob(i: number, job: Omit<RecJob, 'co' | 'apps' | 'applicants'>): Promise<void>
+  publishJob(i: number): Promise<void>
+  closeJob(i: number): Promise<void>
+  deleteJob(i: number): Promise<void>
+  setAppStage(jobIndex: number, en: string, stage: RecJobApplicant['stage']): Promise<void>
 
-  saveMarks(i: number, round: string, score: number, result: string): void
-  saveSalary(i: number, salary: RecCandidateSalary, joining: string, loc: string): void
-  markJoined(i: number): void
-  rejectCand(i: number): void
+  saveMarks(i: number, round: string, score: number, result: string): Promise<void>
+  saveSalary(i: number, salary: RecCandidateSalary, joining: string, loc: string): Promise<void>
+  markJoined(i: number): Promise<void>
+  rejectCand(i: number): Promise<void>
 
-  saveInterview(fields: Omit<Interview, 'status'>): void
-  saveResult(i: number): void
+  saveInterview(fields: Omit<Interview, 'status'>): Promise<void>
+  saveResult(i: number): Promise<void>
 
-  saveOffer(i: number, fields: Omit<Offer, 'status'>): void
-  revokeOffer(i: number): void
+  saveOffer(i: number, fields: Omit<Offer, 'status'>): Promise<void>
+  revokeOffer(i: number): Promise<void>
 
-  saveDrive(fields: Omit<RecDrive, 'reg' | 'status'>): void
+  saveDrive(fields: Omit<RecDrive, 'reg' | 'status'>): Promise<void>
 }
 
 const RecruiterDataContext = createContext<RecruiterDataValue | null>(null)
@@ -106,75 +106,75 @@ export function RecruiterDataProvider({ children }: { children: ReactNode }) {
   const value: RecruiterDataValue = {
     rec, recJobs, recCands, interviews, offers, recDrives,
 
-    saveCompany(fields) {
+    async saveCompany(fields) {
       setRec((r) => ({ ...r, sector: fields.sector || r.sector, website: fields.website || r.website, address: fields.address || r.address, about: fields.about || r.about }))
       showToast('Company profile updated')
     },
-    saveHR(fields) {
+    async saveHR(fields) {
       setRec((r) => ({ ...r, hrHead: { name: fields.name || r.hrHead.name, desig: fields.desig || r.hrHead.desig, email: fields.email || r.hrHead.email, phone: fields.phone || r.hrHead.phone } }))
       showToast('HR Head updated')
     },
-    saveContact(i, contact) {
+    async saveContact(i, contact) {
       setRec((r) => ({ ...r, contacts: r.contacts.map((c, idx) => (idx === i ? { ...contact, primary: c.primary } : c)) }))
       showToast('Contact updated')
     },
-    addContact(contact) {
+    async addContact(contact) {
       setRec((r) => ({ ...r, contacts: [...r.contacts, { ...contact, primary: false }] }))
       showToast('Contact added')
     },
-    deleteContact(i) {
+    async deleteContact(i) {
       setRec((r) => ({ ...r, contacts: r.contacts.filter((_, idx) => idx !== i) }))
       showToast('Contact removed')
     },
-    saveMOU(fields) {
+    async saveMOU(fields) {
       setRec((r) => ({ ...r, mouData: { company: r.company, commit: fields.commit || r.mouData.commit, valid: fields.valid || r.mouData.valid, signatory: fields.signatory || r.mouData.signatory, terms: fields.terms || r.mouData.terms } }))
     },
 
-    saveJob(i, job) {
+    async saveJob(i, job) {
       const backendPayload = mapFrontendPostingToBackend(job);
       if (i >= 0 && recJobs[i]?.id) {
         // Update existing
-        postingApi.update(recJobs[i].id!, backendPayload).then(res => {
+        await postingApi.update(recJobs[i].id!, backendPayload).then(res => {
           setRecJobs((jobs) => jobs.map((j, idx) => (idx === i ? mapBackendPostingToFrontend(res.data || res) : j)))
           showToast(job.status === 'Published' ? 'Posting published — eligible students notified' : 'Saved as draft')
         }).catch(err => console.error('Failed to update job:', err))
       } else {
         // Create new
-        postingApi.create(backendPayload).then(res => {
+        await postingApi.create(backendPayload).then(res => {
           setRecJobs((jobs) => [...jobs, mapBackendPostingToFrontend(res.data || res)])
           showToast('Saved as draft')
         }).catch(err => console.error('Failed to create job:', err))
       }
     },
-    publishJob(i) {
+    async publishJob(i) {
       const jobId = recJobs[i]?.id;
       if (!jobId) return;
-      postingApi.updateStatus(jobId, { status: 'PENDING_APPROVAL' }).then(() => {
+      await postingApi.updateStatus(jobId, { status: 'PENDING_APPROVAL' }).then(() => {
         setRecJobs((jobs) => jobs.map((j, idx) => (idx === i ? { ...j, status: 'Pending approval' } : j)))
         showToast('Submitted to Placement Cell for approval')
       }).catch(err => console.error('Failed to publish job:', err))
     },
-    closeJob(i) {
+    async closeJob(i) {
       const jobId = recJobs[i]?.id;
       if (!jobId) return;
-      postingApi.updateStatus(jobId, { status: 'CLOSED' }).then(() => {
+      await postingApi.updateStatus(jobId, { status: 'CLOSED' }).then(() => {
         setRecJobs((jobs) => jobs.map((j, idx) => (idx === i ? { ...j, status: 'Closed' } : j)))
         showToast('Posting closed')
       }).catch(err => console.error('Failed to close job:', err))
     },
-    deleteJob(i) {
+    async deleteJob(i) {
       // Backend doesn't support deleting job postings in standard schema, but we can remove it from UI
       setRecJobs((jobs) => jobs.filter((_, idx) => idx !== i))
       showToast('Posting hidden')
     },
-    setAppStage(jobIndex, en, stage) {
+    async setAppStage(jobIndex, en, stage) {
       const job = recJobs[jobIndex];
       const applicant = job?.applicants.find(a => a.en === en);
       
       let candName = en;
       
       if (applicant?.id) {
-        applicationApi.updateStatus(applicant.id, { status: mapFrontendStageToBackend(stage) }).then(() => {
+        await applicationApi.updateStatus(applicant.id, { status: mapFrontendStageToBackend(stage) }).then(() => {
           setRecJobs((jobs) => jobs.map((j, idx) => {
             if (idx !== jobIndex) return j
             return { ...j, applicants: j.applicants.map((a) => { if (a.en === en) { candName = en; return { ...a, stage } } return a }) }
@@ -191,7 +191,7 @@ export function RecruiterDataProvider({ children }: { children: ReactNode }) {
       }
     },
 
-    saveMarks(i, round, score, result) {
+    async saveMarks(i, round, score, result) {
       const roundKey = RND.find((r) => r[1] === round)?.[0] as keyof RecCandidateMarks | undefined
       if (!roundKey) return
       const clamped = Math.max(0, Math.min(100, score))
@@ -208,35 +208,35 @@ export function RecruiterDataProvider({ children }: { children: ReactNode }) {
       }))
       showToast(`${recCands[i]?.name} — ${round}: ${clamped}/100 recorded · candidate notified`)
     },
-    saveSalary(i, salary, joining, loc) {
+    async saveSalary(i, salary, joining, loc) {
       const cand = recCands[i]
       if (!cand) return
       setRecCands((cands) => cands.map((c, idx) => (idx === i ? { ...c, salary, stage: 'Offer' } : c)))
       setOffers((o) => [{ cand: cand.name, role: 'Software Engineer', ctc: salary.ctc, joining: joining || 'Jul 2026', loc: loc || 'Ahmedabad', status: 'Released' }, ...o])
       showToast(`Salary finalized — offer released to ${cand.name} and placement cell notified`)
     },
-    markJoined(i) {
+    async markJoined(i) {
       const cand = recCands[i]
       if (!cand) return
       setRecCands((cands) => cands.map((c, idx) => (idx === i ? { ...c, joined: true } : c)))
       if (cand.en === 'GU21CS118') setStatus('Placed')
       showToast(`${cand.name} marked as joined — institutional funnel updated`)
     },
-    rejectCand(i) {
+    async rejectCand(i) {
       setRecCands((cands) => cands.map((c, idx) => (idx === i ? { ...c, stage: 'Rejected' } : c)))
       showToast(`${recCands[i]?.name} rejected`)
     },
 
-    saveInterview(fields) {
+    async saveInterview(fields) {
       setInterviews((list) => [...list, { ...fields, status: 'Scheduled' }])
       showToast('Interview scheduled — candidate notified by email & SMS')
     },
-    saveResult(i) {
+    async saveResult(i) {
       setInterviews((list) => list.map((v, idx) => (idx === i ? { ...v, status: 'Completed' } : v)))
       showToast('Result recorded — candidate will be intimated')
     },
 
-    saveOffer(i, fields) {
+    async saveOffer(i, fields) {
       setOffers((list) => {
         const offer = { ...fields, status: 'Released' as const }
         if (i >= 0) return list.map((o, idx) => (idx === i ? offer : o))
@@ -244,12 +244,12 @@ export function RecruiterDataProvider({ children }: { children: ReactNode }) {
       })
       showToast('Offer released — candidate and placement cell notified')
     },
-    revokeOffer(i) {
+    async revokeOffer(i) {
       setOffers((list) => list.map((o, idx) => (idx === i ? { ...o, status: 'Revoked' } : o)))
       showToast('Offer revoked')
     },
 
-    saveDrive(fields) {
+    async saveDrive(fields) {
       setRecDrives((list) => [{ ...fields, reg: 0, status: 'Upcoming' }, ...list])
       showToast('Drive scheduled — sent to placement cell for slot confirmation')
     },
