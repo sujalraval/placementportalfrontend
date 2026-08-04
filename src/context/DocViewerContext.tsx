@@ -61,7 +61,9 @@ export function DocViewerProvider({ children }: { children: ReactNode }) {
 
   return (
     <DocViewerContext.Provider value={{ openDoc, closeDoc }}>
-      {children}
+      <div className={isOpen ? 'contents print:hidden' : 'contents'}>
+        {children}
+      </div>
       {isOpen && (
         <div className="fixed inset-0 z-[95] flex flex-col bg-[rgba(16,22,38,.62)] print:static print:block print:bg-white">
           <div className="flex flex-none flex-wrap items-center justify-between gap-3 bg-navy px-5 py-3 text-white print:hidden">
@@ -78,10 +80,15 @@ export function DocViewerProvider({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex flex-1 justify-center overflow-auto p-4 print:block print:overflow-visible print:p-0">
-            <div ref={paperRef} className="h-fit min-h-[1040px] w-full max-w-[820px] bg-white p-[46px_52px] shadow-[0_24px_70px_rgba(0,0,0,.45)] print:min-h-0 print:max-w-full print:p-0 print:shadow-none">
+            <div ref={paperRef} className="h-fit min-h-[1040px] w-full max-w-[820px] bg-white p-[46px_52px] print:py-8 shadow-[0_24px_70px_rgba(0,0,0,.45)] print:min-h-0 print:max-w-full print:shadow-none">
               {content}
             </div>
           </div>
+          <style>{`
+            @media print {
+              @page { margin: 0; }
+            }
+          `}</style>
         </div>
       )}
     </DocViewerContext.Provider>
