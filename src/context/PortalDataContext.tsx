@@ -172,11 +172,11 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       })
 
       internshipApi.listPostings().then(data => {
-        const postings = data.data || data;
-        setInternships(postings.map((p: any) => ({
+        const postings = data.data?.data || data.data || data;
+        setInternships(Array.isArray(postings) ? postings.map((p: any) => ({
            id: p.id, co: p.company?.name, role: p.title, type: p.employmentType, stipend: p.ctc ? `₹${p.ctc} / mo` : 'Unpaid',
            mode: p.location || 'Remote', minWeeks: 8, affiliation: 'Corporate', applicants: []
-        })));
+        })) : []);
       }).catch(console.error);
 
       if (user?.id) {

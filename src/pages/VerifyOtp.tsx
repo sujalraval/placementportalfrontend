@@ -42,8 +42,22 @@ export default function VerifyOtp() {
         const mappedRole = data.user.role === 'COORDINATOR' ? 'department' : data.user.role === 'PLACEMENT_OFFICER' ? 'department' : data.user.role.toLowerCase();
         navigate(`/${mappedRole}`, { replace: true });
       } else {
-        await authApi.verifyOtp({ email, otp });
-        navigate('/setup-password', { state: { email, otp, role } });
+        if (location.state?.registrationPayload) {
+          // Complete full student registration
+          await authApi.register({ ...location.state.registrationPayload, otp });
+          
+          // Log them in immediately
+          const data = await authApi.login({ 
+            email, 
+            password: location.state.registrationPayload.password 
+          });
+          setAuth(data.accessToken, data.user);
+          const mappedRole = data.user.role === 'COORDINATOR' ? 'department' : data.user.role === 'PLACEMENT_OFFICER' ? 'department' : data.user.role.toLowerCase();
+          navigate(`/${mappedRole}`, { replace: true });
+        } else {
+          await authApi.verifyOtp({ email, otp });
+          navigate('/setup-password', { state: { email, otp, role } });
+        }
       }
     } catch (err: any) {
       if (isLogin && err.response?.status === 401) {
