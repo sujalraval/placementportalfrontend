@@ -37,7 +37,8 @@ function GenericMasterTable({ masterId, title }: { masterId: string, title: stri
   const loadData = () => {
     setLoading(true)
     adminApi.listMaster(masterId).then(res => {
-      setData(res.data?.data || [])
+      const arr = res.data?.data || res.data || []
+      setData(Array.isArray(arr) ? arr : [])
     }).catch(console.error).finally(() => setLoading(false))
   }
 
