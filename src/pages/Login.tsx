@@ -26,8 +26,6 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginMethod, setLoginMethod] = useState<'password' | 'otp'>('password');
 
-  // Where to send the user after login
-  const from = location.state?.from?.pathname || '/dashboard';
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
