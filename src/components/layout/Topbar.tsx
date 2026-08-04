@@ -65,7 +65,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       <div className="flex items-center gap-2">
         <Link
           to="/role-selection"
-          className="whitespace-nowrap rounded-full bg-gold px-5 py-1.5 text-[13.5px] font-semibold text-navy transition-colors hover:bg-gold/90"
+          className="whitespace-nowrap rounded-sm bg-gold px-5 py-1.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-gold/90"
         >
           Login
         </Link>
