@@ -4,6 +4,7 @@ import { Field, Input, Select, Textarea } from '@/components/ui/Field'
 import { useModal } from '@/context/ModalContext'
 import { useToast } from '@/context/ToastContext'
 import { DEPTS } from '@/data/mock/departments'
+import { authApi } from '@/api/auth'
 
 type PartnerType = 'employer' | 'agency' | 'agent'
 
@@ -47,11 +48,47 @@ export function RecruiterOnboardModal({ kind }: RecruiterOnboardModalProps) {
   const { closeModal } = useModal()
   const { showToast } = useToast()
   const [ptype, setPtype] = useState<PartnerType>('employer')
+  const [companyName, setCompanyName] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const copy = TYPE_COPY[ptype]
 
-  const submit = () => {
-    closeModal()
-    showToast(SUBMIT_MESSAGE[ptype])
+  const submit = async () => {
+    if (!companyName || !fullName || !email || !password) {
+      showToast('Please fill out Company Name, Contact Name, Email, and Password.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showToast('Passwords do not match.');
+      return;
+    }
+    if (password.length < 10) {
+      showToast('Password must be at least 10 characters long.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await authApi.register({
+        email,
+        password,
+        fullName,
+        role: 'RECRUITER',
+        // We pass extra properties which authApi maps properly for recruiters
+        companyName,
+        companyType: ptype === 'employer' ? 'DIRECT_EMPLOYER' : 'AGENCY',
+      } as any);
+      
+      showToast(SUBMIT_MESSAGE[ptype])
+      closeModal()
+    } catch (err: any) {
+      showToast(err.response?.data?.error?.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -71,8 +108,8 @@ export function RecruiterOnboardModal({ kind }: RecruiterOnboardModalProps) {
       </Field>
 
       <SectionLabel>Company details</SectionLabel>
-      <div className="grid grid-cols-2 gap-x-4">
-        <Field label={copy.nameLabel}><Input placeholder={copy.namePlaceholder} /></Field>
+      <div className="grid grid-cols-3 gap-x-4 gap-y-1">
+        <Field label={copy.nameLabel}><Input placeholder={copy.namePlaceholder} value={companyName} onChange={e => setCompanyName(e.target.value)} /></Field>
         <Field label="Sector / industry"><Input placeholder="IT Services / Banking / Pharma…" /></Field>
         <Field label="Website"><Input placeholder="https://" /></Field>
         <Field label="Partner as">
@@ -87,7 +124,7 @@ export function RecruiterOnboardModal({ kind }: RecruiterOnboardModalProps) {
       {copy.showAgencyBlock && (
         <>
           <SectionLabel>Agency / manpower supply details</SectionLabel>
-          <div className="grid grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-3 gap-x-4 gap-y-1">
             <Field label={copy.licLabel}><Input placeholder="e.g. RGE/1234/2024" /></Field>
             <Field label="Years in operation"><Input placeholder="5" /></Field>
           </div>
@@ -102,7 +139,7 @@ export function RecruiterOnboardModal({ kind }: RecruiterOnboardModalProps) {
 
       <SectionLabel>Company address</SectionLabel>
       <Field label="Address line" full><Input placeholder="Building, street, area" /></Field>
-      <div className="grid grid-cols-2 gap-x-4">
+      <div className="grid grid-cols-3 gap-x-4 gap-y-1">
         <Field label="City"><Input placeholder="Ahmedabad" /></Field>
         <Field label="State"><Input placeholder="Gujarat" /></Field>
         <Field label="PIN code"><Input placeholder="380009" /></Field>
@@ -110,7 +147,7 @@ export function RecruiterOnboardModal({ kind }: RecruiterOnboardModalProps) {
       </div>
 
       <SectionLabel>{copy.hrTitle}</SectionLabel>
-      <div className="grid grid-cols-2 gap-x-4">
+      <div className="grid grid-cols-3 gap-x-4 gap-y-1">
         <Field label="Full name"><Input placeholder="Name of HR Head" /></Field>
         <Field label="Designation"><Input placeholder="Head of Human Resources" /></Field>
         <Field label="Email"><Input placeholder="hrhead@company.com" /></Field>
@@ -118,11 +155,17 @@ export function RecruiterOnboardModal({ kind }: RecruiterOnboardModalProps) {
       </div>
 
       <SectionLabel>Primary contact person</SectionLabel>
-      <div className="grid grid-cols-2 gap-x-4">
-        <Field label="Full name"><Input placeholder="Point of contact" /></Field>
+      <div className="grid grid-cols-3 gap-x-4 gap-y-1">
+        <Field label="Full name"><Input placeholder="Point of contact" value={fullName} onChange={e => setFullName(e.target.value)} /></Field>
         <Field label="Designation"><Input placeholder="Campus Recruitment Lead" /></Field>
-        <Field label="Work email"><Input placeholder="contact@company.com" /></Field>
+        <Field label="Work email"><Input placeholder="contact@company.com" value={email} onChange={e => setEmail(e.target.value)} /></Field>
         <Field label="Phone"><Input placeholder="+91" /></Field>
+      </div>
+
+      <SectionLabel>Account Security</SectionLabel>
+      <div className="grid grid-cols-2 gap-x-4">
+        <Field label="Password"><Input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} /></Field>
+        <Field label="Confirm password"><Input type="password" placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} /></Field>
       </div>
 
       <SectionLabel>Hiring requirements</SectionLabel>
@@ -137,8 +180,10 @@ export function RecruiterOnboardModal({ kind }: RecruiterOnboardModalProps) {
       </Field>
 
       <div className="mt-1 flex flex-wrap gap-2.5">
-        <Button onClick={submit}>Submit for verification</Button>
-        <Button variant="ghost" onClick={closeModal}>Cancel</Button>
+        <Button onClick={submit} disabled={isLoading}>
+          {isLoading ? 'Submitting...' : 'Submit for verification'}
+        </Button>
+        <Button variant="ghost" onClick={closeModal} disabled={isLoading}>Cancel</Button>
       </div>
     </div>
   )

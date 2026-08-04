@@ -39,8 +39,8 @@ export default function VerifyOtp() {
       if (isLogin) {
         const data = await authApi.loginOtp({ email, otp });
         setAuth(data.accessToken, data.user);
-        const mappedRole = data.user.role === 'COORDINATOR' ? 'dept' : data.user.role.toLowerCase();
-        navigate(`/${mappedRole}/dashboard`, { replace: true });
+        const mappedRole = data.user.role === 'COORDINATOR' ? 'department' : data.user.role === 'PLACEMENT_OFFICER' ? 'department' : data.user.role.toLowerCase();
+        navigate(`/${mappedRole}`, { replace: true });
       } else {
         await authApi.verifyOtp({ email, otp });
         navigate('/setup-password', { state: { email, otp, role } });

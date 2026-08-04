@@ -11,7 +11,7 @@ import { usePortalData } from '@/context/PortalDataContext'
 import { DirectOnboardModal } from '@/components/modals/DirectOnboardModal'
 
 export default function AdminCompaniesPage() {
-  const { companies, promoteCompanyToUniversityWide } = usePortalData()
+  const { companies, promoteCompanyToUniversityWide, verifyCompany } = usePortalData()
   const { openModal } = useModal()
   const { showToast } = useToast()
 
@@ -42,7 +42,7 @@ export default function AdminCompaniesPage() {
                 <td className="border-b border-line-2 px-3.5 py-3"><Pill status={c.status} /></td>
                 <td className="border-b border-line-2 px-3.5 py-3 text-right">
                   <div className="flex justify-end gap-1.5">
-                    {c.status === 'Verifying' && <IconControlButton onClick={() => showToast(`${c.name} verified`)}>Verify</IconControlButton>}
+                    {c.status === 'Verifying' && <IconControlButton onClick={() => verifyCompany(i)}>Verify</IconControlButton>}
                     {c.deptScope !== 'University-wide' && <IconControlButton onClick={() => promoteCompanyToUniversityWide(i)}>Promote</IconControlButton>}
                     <IconControlButton onClick={() => showToast(`Opening ${c.name}…`)}>View</IconControlButton>
                   </div>

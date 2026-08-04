@@ -1,4 +1,3 @@
-import { SubNav } from '@/components/landing/SubNav'
 import { Hero } from '@/components/landing/Hero'
 import { StatsStrip } from '@/components/landing/StatsStrip'
 import { OfficerBand } from '@/components/landing/OfficerBand'
@@ -18,7 +17,6 @@ import { Footer } from '@/components/landing/Footer'
 export function LandingPage() {
   return (
     <div className="mx-auto max-w-[1180px]">
-      <SubNav />
       <Hero />
       <StatsStrip />
       <OfficerBand />

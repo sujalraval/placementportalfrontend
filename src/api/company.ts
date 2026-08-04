@@ -6,7 +6,7 @@ export const companyApi = {
   getById: (id: string) => apiClient.get(`/companies/${id}`),
   create: (data: any) => apiClient.post('/companies', data),
   update: (id: string, data: any) => apiClient.patch(`/companies/${id}`, data),
-  verify: (id: string, data: { status: 'VERIFIED' | 'REJECTED' }) => apiClient.patch(`/companies/${id}/verification`, data),
+  verify: (id: string, data: { verificationStatus: 'APPROVED' | 'REJECTED' }) => apiClient.patch(`/companies/${id}/verification`, data),
   
   addContact: (id: string, data: any) => apiClient.post(`/companies/${id}/contacts`, data),
   getMou: (id: string) => apiClient.get(`/companies/${id}/mou`),

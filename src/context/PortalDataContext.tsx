@@ -46,6 +46,7 @@ interface PortalDataValue {
   promoteCompanyToUniversityWide(i: number): void
   deleteCompany(i: number): void
   addCompanyDirect(company: any): Promise<void>
+  verifyCompany(i: number): Promise<void>
 
   updatePersonal(fields: Partial<Pick<StudentProfile, 'name' | 'dob' | 'gender' | 'category' | 'city' | 'email' | 'phone' | 'linkedin' | 'github' | 'address'>>): void
   updateAbout(headline: string, summary: string): void
@@ -213,6 +214,18 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       const name = companies[i]?.name
       setCompanies((list) => list.filter((_, idx) => idx !== i))
       showToast(`${name} removed from your department's recruiter list`)
+    },
+    verifyCompany(i) {
+      const c = companies[i]
+      if (!c || !c.id) return Promise.resolve()
+      return companyApi.verify(c.id, { verificationStatus: 'APPROVED' }).then(() => {
+        setCompanies((list) => list.map((x, idx) => (idx === i ? { ...x, status: 'Active' } : x)))
+        showToast(`${c.name} verified`)
+      }).catch((err) => {
+        console.error("API ERROR:", err.response?.data);
+        showToast(err.response?.data?.error?.message || 'Failed to verify company');
+        throw err;
+      })
     },
     addCompanyDirect(company: any) {
       const slug = company.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');

@@ -11,6 +11,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import VerifyOtp from './pages/VerifyOtp'
 import SetupPassword from './pages/SetupPassword'
+import RoleSelection from './pages/RoleSelection'
 import { useAuthStore } from './store/useAuthStore'
 import { authApi } from './api/auth'
 
@@ -39,6 +40,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/role-selection" element={<RoleSelection />} />
           <Route path="/:role/login" element={<Login />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/setup-password" element={<SetupPassword />} />

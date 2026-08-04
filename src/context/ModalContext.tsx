@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 
 interface ModalContextValue {
-  openModal: (title: ReactNode, body: ReactNode) => void
+  openModal: (title: ReactNode, body: ReactNode, size?: 'sm' | 'md' | 'lg' | 'xl') => void
   closeModal: () => void
 }
 
@@ -11,14 +11,23 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
   const [title, setTitle] = useState<ReactNode>(null)
   const [body, setBody] = useState<ReactNode>(null)
+  const [size, setSize] = useState<'sm' | 'md' | 'lg' | 'xl'>('md')
 
-  const openModal = useCallback((newTitle: ReactNode, newBody: ReactNode) => {
+  const openModal = useCallback((newTitle: ReactNode, newBody: ReactNode, newSize: 'sm' | 'md' | 'lg' | 'xl' = 'md') => {
     setTitle(newTitle)
     setBody(newBody)
+    setSize(newSize)
     setIsOpen(true)
   }, [])
 
   const closeModal = useCallback(() => setIsOpen(false), [])
+
+  const maxWidthClass = {
+    sm: 'max-w-[400px]',
+    md: 'max-w-[520px]',
+    lg: 'max-w-[760px]',
+    xl: 'max-w-[960px]',
+  }[size]
 
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
@@ -28,7 +37,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
           className="fixed inset-0 z-[90] flex items-center justify-center bg-[rgba(20,25,40,.55)] p-5"
           onClick={(e) => e.target === e.currentTarget && closeModal()}
         >
-          <div className="max-h-[88vh] w-full max-w-[520px] overflow-auto rounded-xl border-t-4 border-gold bg-white shadow-[0_30px_80px_rgba(0,0,0,.35)]">
+          <div className={`max-h-[88vh] w-full ${maxWidthClass} overflow-auto rounded-xl border-t-4 border-gold bg-white shadow-[0_30px_80px_rgba(0,0,0,.35)]`}>
             <div className="flex items-center justify-between border-b border-line px-[22px] py-[18px]">
               <h3 className="text-lg">{title}</h3>
               <button

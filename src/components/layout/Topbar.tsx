@@ -1,26 +1,23 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { NAV, PERSONA_SWITCHER } from '@/data/nav'
-import type { PersonaKey } from '@/types/nav'
+import { Link, useLocation } from 'react-router-dom'
+import { scrollToSection } from '@/lib/text'
 
 interface TopbarProps {
   onMenuClick?: () => void
 }
 
-export function Topbar({ onMenuClick }: TopbarProps) {
-  const { persona, role } = useParams<{ persona?: string; role?: string }>()
-  const navigate = useNavigate()
-  
-  let active = persona ?? role ?? 'website'
-  if (active === 'department') active = 'dept'
-  if (active === 'erp') active = 'admin'
+const LINKS = [
+  { label: 'About', id: 'about' },
+  { label: 'News', id: 'news' },
+  { label: 'Jobs', id: 'jobs' },
+  { label: 'Drives', id: 'drives' },
+  { label: 'Team', id: 'team' },
+  { label: 'Gallery', id: 'gallery' },
+  { label: 'Contact', id: 'contact' },
+]
 
-  const goToPersona = (key: PersonaKey | 'website') => {
-    if (key === 'website') {
-      navigate('/')
-      return
-    }
-    navigate(`/${key}/${NAV[key].items[0].key}`)
-  }
+export function Topbar({ onMenuClick }: TopbarProps) {
+  const location = useLocation()
+  const isHome = location.pathname === '/'
 
   return (
     <div className="sticky top-0 z-50 flex items-center justify-between gap-4 border-b-[3px] border-gold bg-navy px-[22px] py-2.5 text-white">
@@ -42,18 +39,36 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           </div>
         </Link>
       </div>
-      <div className="flex gap-1 overflow-x-auto rounded-full bg-white/[.09] p-1">
-        {PERSONA_SWITCHER.map((p) => (
-          <button
-            key={p.key}
-            onClick={() => goToPersona(p.key)}
-            className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-              active === p.key ? 'bg-white text-navy' : 'text-[#C9D4E6] hover:text-white'
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
+
+      <div className="hidden lg:flex flex-1 items-center justify-center gap-1 overflow-x-auto rounded-full px-4">
+        {isHome && (
+          <>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-[#C9D4E6] hover:bg-white hover:text-navy transition-colors"
+            >
+              Home
+            </button>
+            {LINKS.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => scrollToSection(l.id)}
+                className="whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-[#C9D4E6] hover:bg-white hover:text-navy transition-colors"
+              >
+                {l.label}
+              </button>
+            ))}
+          </>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Link
+          to="/role-selection"
+          className="whitespace-nowrap rounded-full bg-gold px-5 py-1.5 text-[13.5px] font-semibold text-navy transition-colors hover:bg-gold/90"
+        >
+          Login
+        </Link>
       </div>
     </div>
   )

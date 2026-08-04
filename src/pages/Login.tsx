@@ -3,12 +3,16 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/useAuthStore';
 import { Loader2, Mail, Lock, AlertCircle } from 'lucide-react';
+import { useModal } from '../context/ModalContext';
+import { RecruiterOnboardModal } from '../components/modals/RecruiterOnboardModal';
+import { StudentRegisterModal } from '../components/modals/StudentRegisterModal';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { role } = useParams<{ role: string }>();
   const { setAuth } = useAuthStore();
+  const { openModal } = useModal();
 
   const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
   const title = displayRole ? `${displayRole} Login` : 'Welcome Back';
@@ -33,7 +37,10 @@ export default function Login() {
     try {
       const data = await authApi.login({ email, password });
       setAuth(data.accessToken, data.user);
-      navigate(from, { replace: true });
+      
+      const roleStr = data.user.role === 'COORDINATOR' || data.user.role === 'PLACEMENT_OFFICER' ? 'department' : data.user.role.toLowerCase();
+      const targetPath = (!location.state?.from?.pathname || location.state?.from?.pathname === '/dashboard' || location.state?.from?.pathname === '/') ? `/${roleStr}` : location.state.from.pathname;
+      navigate(targetPath, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.error?.message || 'Failed to login. Please check your credentials.');
     } finally {
@@ -214,7 +221,27 @@ export default function Login() {
           </div>
         </form>
 
-        {/* Registration is now integrated into the OTP flow */}
+        {/* Sign Up Link */}
+        {(role === 'recruiter' || role === 'student') && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted">
+              Don't have an account?{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  if (role === 'recruiter') {
+                    openModal('Partner with Gujarat University', <RecruiterOnboardModal kind="Full-time hiring" />, 'xl');
+                  } else if (role === 'student') {
+                    openModal('Student registration', <StudentRegisterModal />);
+                  }
+                }}
+                className="font-medium text-navy hover:text-navy-2 transition-colors hover:underline"
+              >
+                Sign up
+              </button>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
