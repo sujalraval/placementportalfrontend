@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Field, Input, Select } from '@/components/ui/Field'
 import { useModal } from '@/context/ModalContext'
-import { useToast } from '@/context/ToastContext'
 import { authApi } from '@/api/auth'
 import { adminApi } from '@/api/admin'
 import { Loader2 } from 'lucide-react'
 
 export function StudentRegisterModal() {
   const { closeModal } = useModal()
-  const { showToast } = useToast()
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({

@@ -176,7 +176,7 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
         setInternships(Array.isArray(postings) ? postings.map((p: any) => ({
            id: p.id, co: p.company?.name, role: p.title, type: p.employmentType, stipend: p.ctc ? `₹${p.ctc} / mo` : 'Unpaid',
            mode: p.location || 'Remote', minWeeks: 8, affiliation: 'Corporate', applicants: []
-        })) : []);
+        } as any)) : []);
       }).catch(console.error);
 
       if (user?.id) {
